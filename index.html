@@ -525,13 +525,55 @@ button:focus,input:focus,select:focus,textarea:focus{outline:3px solid rgba(31,7
     }
 }
 
+
+
+/* ===== V26.5.9B - Usabilidade das Tabelas: paginação, detalhes e despesas operacionais ===== */
+.pagination-bar{display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap;margin:.85rem 0 0;padding:.65rem .75rem;background:#f8fbfd;border:1px solid #e1e7ee;border-radius:14px;color:#60717d;font-size:.86rem;font-weight:800}
+.pagination-actions{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap}
+.pagination-actions button{min-width:auto;min-height:34px;padding:.38rem .7rem;font-size:.8rem}
+.pagination-actions button:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none}
+.detalhes-modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.48);display:flex;align-items:center;justify-content:center;z-index:100000;padding:1rem}
+.detalhes-modal{background:#fff;border-radius:20px;box-shadow:0 18px 48px rgba(0,0,0,.25);width:min(780px,96vw);max-height:90vh;overflow:auto;border-top:6px solid #d4af37}
+.detalhes-modal-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.15rem;border-bottom:1px solid #e1e7ee}
+.detalhes-modal-header h3{margin:0;color:#1f4e79}
+.detalhes-modal-body{padding:1.15rem}
+.detalhes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.75rem}
+.detalhe-box{background:#f8fbfd;border:1px solid #e1e7ee;border-radius:14px;padding:.75rem}
+.detalhe-label{font-size:.72rem;text-transform:uppercase;color:#60717d;font-weight:900;margin-bottom:.25rem}
+.detalhe-value{font-size:.94rem;color:#263238;font-weight:800;word-break:break-word}
+.table-wrap table.tabela-despesas-operacional th,.table-wrap table.tabela-despesas-operacional td{white-space:normal}
+.table-wrap table.tabela-despesas-operacional td:nth-child(2){text-align:left;min-width:170px}
+.table-wrap table.tabela-despesas-operacional td:last-child,.table-wrap table.tabela-despesas-operacional th:last-child{min-width:230px}
+@media(max-width:720px){.pagination-bar{align-items:stretch}.pagination-actions{width:100%;justify-content:space-between}.detalhes-modal-backdrop{align-items:flex-start}.detalhes-modal{margin-top:1rem}.table-wrap table.tabela-despesas-operacional{min-width:760px}}
+
+
+/* ===== V26.6.1 - Inteligência do Indicador de Preço ===== */
+.price-chip{
+    padding:.42rem .78rem!important;
+    border-radius:999px!important;
+    font-size:.82rem!important;
+    font-weight:950!important;
+    letter-spacing:.03em!important;
+    text-transform:uppercase!important;
+    box-shadow:0 3px 8px rgba(0,0,0,.16)!important;
+    min-height:32px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:.25rem!important;
+}
+.price-chip.chip-ganho{background:#008037!important;color:#fff!important}
+.price-chip.chip-perda{background:#b91c1c!important;color:#fff!important}
+.price-chip.chip-neutro{background:#d4af37!important;color:#1f2937!important}
+.price-card .metric-box.metric-wide{grid-column:1/-1}
+
 </style>
 </head>
 <body>
 <div class="app-header"><div class="logo-area"><h1>SISTEMA DE GESTÃO INTEGRADA DE RESÍDUOS SÓLIDOS</h1><p>Controle Operacional, Financeiro e Gerencial para Cooperativas de Reciclagem</p></div><div class="badge-version"><span class="badge-small">PROGRAMA</span><span class="badge-main">SEBRAE / PRÓ-CATADORES</span></div></div>
 <div class="app-container"><div class="sidebar"><nav id="main-menu"><button data-view="dashboard">📊 Dashboard</button><button data-view="gestaoVista">🧭 Gestão à Vista</button><button data-view="producao">📦 Produção</button><button data-view="vendas">💰 Vendas</button><button data-view="despesas">📉 Despesas</button><button data-view="estoque">🏷️ Estoque</button><button data-view="cooperados">👥 Cooperados</button><button data-view="pessoas">👥 Pessoas</button><button data-view="precoMedio">📈 Indicador Preço Médio</button><button data-view="relatorioExecutivo">📄 Relatório Executivo</button><button data-view="guiaUtilizacao">📘 Guia de Utilização</button><button data-view="cadastros">⚙️ Cadastros</button><button data-view="backup">💾 Backup</button></nav></div><main class="main-content" id="dynamic-view"></main></div>
 <script>
-const SISTEMA_VERSAO='V26.5.8B';
+const SISTEMA_VERSAO='V26.6.2';
 
 /* ===== V26.5.5B - Experiência do Usuário: Notificações discretas ===== */
 function garantirToastContainer(){
@@ -587,6 +629,38 @@ function salvarDB(){
 function carregarDB(){const data=localStorage.getItem("recControlDB"); if(data){try{db=JSON.parse(data)}catch(e){alert("Erro ao carregar banco local")}} if(!db.producao)db.producao=[]; if(!db.vendas)db.vendas=[]; if(!db.despesas)db.despesas=[]; if(!db.cooperados)db.cooperados=[]; if(!db.frequencia)db.frequencia=[]; if(!db.ocorrenciasSaude)db.ocorrenciasSaude=[]; if(!db.metasVista)db.metasVista={}; if(!db.cooperativa)db.cooperativa={nome:'',cnpj:'',municipio:'',uf:'',telefone:'',email:'',presidente:''}; db.cooperativa={nome:'',cnpj:'',municipio:'',uf:'',telefone:'',email:'',presidente:'',...db.cooperativa}; if(!db.categorias)db.categorias=[]; db.categorias=[...new Set([...categoriasPadrao,...db.categorias])]; if(!db.materiais)db.materiais=[]; sincronizarMateriaisPadrao(); salvarDB();}
 function sincronizarMateriaisPadrao(){const mapaPadrao=new Map(); materiaisPadrao.forEach(m=>{let[nome,categoria,unidade,tipoPadrao]=m.split("|"); mapaPadrao.set(nome,{nome,categoria,unidade,tipoPadrao});}); db.materiais=db.materiais.map(mat=>{let padrao=mapaPadrao.get(mat.nome); return padrao?{...mat,categoria:padrao.categoria,unidade:padrao.unidade,tipoPadrao:padrao.tipoPadrao}:mat;}); mapaPadrao.forEach((padrao,nome)=>{if(!db.materiais.some(m=>m.nome===nome))db.materiais.push(padrao);}); db.producao.forEach(p=>{let padrao=mapaPadrao.get(p.material); if(padrao){p.categoria=padrao.categoria; p.unidade=padrao.unidade; p.tipo=padrao.tipoPadrao; p.tipoPadrao=padrao.tipoPadrao;}});}
 function moeda(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0)} function num(v,d=2){let n=Number(v)||0; if(Number.isInteger(n))return String(n).replace('.',','); return n.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:d})} function formatarDataBR(data){if(!data)return '';let d=String(data);if(/^\d{2}\/\d{2}\/\d{4}$/.test(d))return d;if(!/^\d{4}-\d{2}-\d{2}$/.test(d))return d;let [a,m,di]=d.split('-');return `${di}/${m}/${a}`} function normalizarDataISO(data){if(!data)return '';let d=String(data).trim();if(/^\d{4}-\d{2}-\d{2}$/.test(d))return d;if(/^\d{2}\/\d{2}\/\d{4}$/.test(d)){let [di,m,a]=d.split('/');return `${a}-${m}-${di}`}return d} function hojeISO(){return new Date().toISOString().slice(0,10)} function anoAtual(){return new Date().getFullYear()} function mesAtual(){return new Date().getMonth()+1} function mesNome(m){return new Date(2026,m-1,1).toLocaleString('pt-BR',{month:'long'})} function getDate(v){return v?new Date(v+"T00:00:00"):null} function mesmoMesAno(data,mes,ano){let d=getDate(data);return d&&(!mes||d.getMonth()+1===Number(mes))&&(!ano||d.getFullYear()===Number(ano))} function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function dataParaOrdenacao(valor){
+    if(!valor)return 0;
+    const d=getDate(valor);
+    return d?d.getTime():0;
+}
+function compararDataDesc(a,b){
+    return dataParaOrdenacao(b)-dataParaOrdenacao(a);
+}
+function compararIdDesc(a,b){
+    return Number(b?.id||0)-Number(a?.id||0);
+}
+function adicionarMesesData(dataISO, meses){
+    if(!dataISO)return '';
+    const [ano,mes,dia]=dataISO.split('-').map(Number);
+    const base=new Date(ano, mes-1, 1);
+    base.setMonth(base.getMonth()+Number(meses||0));
+    const ultimoDia=new Date(base.getFullYear(), base.getMonth()+1, 0).getDate();
+    const diaFinal=Math.min(dia, ultimoDia);
+    const dt=new Date(base.getFullYear(), base.getMonth(), diaFinal);
+    const pad=n=>String(n).padStart(2,'0');
+    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+}
+function idUnicoSequencial(base, indice){
+    return Number(base)+Number(indice||0);
+}
+function descricaoRecorrenciaDespesa(d){
+    return d?.recorrencia==='Mensal'?'Mensal':'Única';
+}
+function descricaoParcelaDespesa(d){
+    return d?.recorrencia==='Mensal'&&d.parcelaTotal?`${d.parcelaAtual||1}/${d.parcelaTotal}`:'—';
+}
+
 
 function nomeArquivoBackup(){let agora=new Date();let pad=n=>String(n).padStart(2,'0');return `backup_sistema_residuos_${agora.getFullYear()}-${pad(agora.getMonth()+1)}-${pad(agora.getDate())}_${pad(agora.getHours())}-${pad(agora.getMinutes())}-${pad(agora.getSeconds())}.json`;}
 function baixarBackup(modo='manual'){
@@ -755,12 +829,12 @@ function salvarProducao(){
     let item={id:editProducaoId||Date.now(),data,material,categoria,unidade,tipo,quantidade,catadores,produtividade:catadores?quantidade/catadores:0,observacoes};
     aplicarAuditoriaSalvar(item,atual);
     if(editProducaoId){let i=db.producao.findIndex(p=>p.id===editProducaoId); if(i>=0)db.producao[i]=item; editProducaoId=null}else db.producao.push(item);
-    salvarDB(); renderProducao();
+    salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editProducaoId?'Produção atualizada com sucesso.':'Produção registrada com sucesso.','sucesso'); renderProducao();
 }
 function listarProducoes(){
     inserirFiltroCancelados(document.querySelector('#listaProducao')?.closest('.card-panel'),'fProdMostrarCancelados','Mostrar canceladas',listarProducoes);
     let mostrar=garantirFiltroCancelados('fProdMostrarCancelados',listarProducoes);
-    let lista=filtrarProducao().filter(p=>mostrar||registroAtivo(p));
+    let lista=filtrarProducao().filter(p=>mostrar||registroAtivo(p)).sort((a,b)=>compararDataDesc(a.data,b.data)||compararIdDesc(a,b));
     let listaIndicadores=lista.filter(registroAtivo);
     let r=resumoProducao(listaIndicadores);
     indicadoresProducao.innerHTML=`<div class="dashboard-cards"><div class="card"><div>Total válido</div><div class="card-value">${num(r.total)} kg</div></div><div class="card"><div>Processado</div><div class="card-value">${num(r.processado)} kg</div></div><div class="card"><div>Bruto</div><div class="card-value">${num(r.bruto)} kg</div></div><div class="card"><div>Rejeito</div><div class="card-value">${num(r.rejeito)} kg</div></div><div class="card"><div>Eficiência</div><div class="card-value">${num(r.eficiencia,1)}%</div></div><div class="card"><div>Maior categoria</div><div class="card-value">${r.topCat?escapeHtml(r.topCat[0]):'-'}</div><small>${r.topCat?num(r.topCat[1])+' kg':''}</small></div></div><div class="grid-2"><div class="card-panel"><h3>Produção por categoria</h3>${listaResumo(r.porCategoria)}</div><div class="card-panel"><h3>Produção por material</h3>${listaResumo(r.porMaterial,'kg',10)}</div></div>`;
@@ -784,13 +858,13 @@ function salvarVendaFn(){
     let item={id:editVendaId||Date.now(),data,material,categoria,tipo,unidade,quantidade:qtd,precoUnit,total:qtd*precoUnit,comprador:vendaComprador.value,observacoes:vendaObs.value};
     aplicarAuditoriaSalvar(item,atual);
     if(editVendaId){let i=db.vendas.findIndex(v=>v.id===editVendaId); if(i>=0)db.vendas[i]=item; editVendaId=null}else db.vendas.push(item);
-    salvarDB();renderVendas();
+    salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editVendaId?'Venda atualizada com sucesso.':'Venda registrada com sucesso.','sucesso');renderVendas();
 }
 function listarVendas(){
     inserirFiltroCancelados(document.querySelector('#listaVendas')?.closest('.card-panel'),'fVendaMostrarCanceladas','Mostrar canceladas',listarVendas);
     let mostrar=garantirFiltroCancelados('fVendaMostrarCanceladas',listarVendas);
     let mes=fVendaMes.value,ano=fVendaAno.value,cat=fVendaCategoria.value,mat=fVendaMaterial.value;
-    let lista=db.vendas.filter(v=>{let matCad=db.materiais.find(m=>m.nome===v.material)||{};let categoria=v.categoria||matCad.categoria||'';return mesmoMesAno(v.data,mes,ano)&&(!cat||categoria===cat)&&(!mat||v.material===mat)&&(mostrar||registroAtivo(v))});
+    let lista=db.vendas.filter(v=>{let matCad=db.materiais.find(m=>m.nome===v.material)||{};let categoria=v.categoria||matCad.categoria||'';return mesmoMesAno(v.data,mes,ano)&&(!cat||categoria===cat)&&(!mat||v.material===mat)&&(mostrar||registroAtivo(v))}).sort((a,b)=>compararDataDesc(a.data,b.data)||compararIdDesc(a,b));
     let listaTotais=lista.filter(registroAtivo);
     let qtdTotal=listaTotais.reduce((a,v)=>a+Number(v.quantidade||0),0), fatTotal=listaTotais.reduce((a,v)=>a+Number(v.total||0),0);
     listaVendas.innerHTML=`<div class="notice"><strong>Total vendido:</strong> ${num(qtdTotal)} kg &nbsp; | &nbsp; <strong>Faturamento:</strong> ${moeda(fatTotal)} &nbsp; | &nbsp; <strong>Preço médio:</strong> ${moeda(fatTotal/(qtdTotal||1))}/kg <span class="muted">(somente registros ativos)</span></div><div class="table-wrap"><table><tr><th>Data</th><th>Material</th><th>Categoria</th><th>Tipo</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Comprador</th><th>Status</th><th>Ações</th></tr>${lista.map(v=>{let matCad=db.materiais.find(m=>m.nome===v.material)||{};let cancelado=registroCancelado(v);return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(v.data)}</td><td>${escapeHtml(v.material)}${detalhesCancelamento(v)}</td><td>${escapeHtml(v.categoria||matCad.categoria||'')}</td><td>${escapeHtml(v.tipo||matCad.tipoPadrao||'Bruto')}</td><td>${num(v.quantidade)} ${escapeHtml(v.unidade||matCad.unidade||'kg')}</td><td>${moeda(v.precoUnit)}</td><td>${moeda(v.total)}</td><td>${escapeHtml(v.comprador||'')}</td><td>${cancelado?'<span class="status-chip chip-cancelado">CANCELADO</span>':'<span class="status-chip chip-pago">ATIVO</span>'}</td><td>${cancelado?'<span class="muted">Auditoria</span>':`<button class="mini-btn info" onclick="editarVenda(${v.id})">✏️ Editar</button> <button class="mini-btn danger" onclick="excluirVenda(${v.id})">🚫 Cancelar</button>`}</td></tr>`}).join('')||'<tr><td colspan="10">Sem vendas.</td></tr>'}</table></div>`;
@@ -808,7 +882,7 @@ function salvarCoopFn(){
     if(atual&&atual.foto&&!item.foto)item.foto=atual.foto;
     aplicarAuditoriaSalvar(item,atual);
     let fotoFile=coopFoto.files&&coopFoto.files[0];
-    let finalizar=()=>{if(editCoopId){let i=db.cooperados.findIndex(c=>c.id===editCoopId); if(i>=0)db.cooperados[i]=item; editCoopId=null}else db.cooperados.push(item); salvarDB(); renderCooperados();};
+    let finalizar=()=>{if(editCoopId){let i=db.cooperados.findIndex(c=>c.id===editCoopId); if(i>=0)db.cooperados[i]=item; editCoopId=null}else db.cooperados.push(item); salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editCoopId?'Cooperado atualizado com sucesso.':'Cooperado salvo com sucesso.','sucesso'); renderCooperados();};
     if(fotoFile){let reader=new FileReader(); reader.onload=e=>{item.foto=e.target.result; finalizar()}; reader.readAsDataURL(fotoFile)}else finalizar();
 }
 function cooperadosAtivosLista(){return db.cooperados.filter(c=>registroAtivo(c)&&c.ativo==='Sim'&&c.situacaoOperacional==='Ativo')}
@@ -1009,12 +1083,12 @@ function mapaVendasVolume(lista){let obj={}; lista.forEach(v=>obj[v.material]=(o
 
 function renderProducao(){let html=`<div class="card-panel"><h2>${editProducaoId?'✏️ Editar Produção':'➕ Nova Produção'}</h2><div class="notice"><strong>Lançamento simplificado:</strong> selecione o material e o sistema preencherá automaticamente categoria, unidade e tipo.</div><div class="form-grid"><div class="field"><label for="prodData">Data da produção</label><input type="date" id="prodData"></div><div class="field"><label for="prodMaterial">Material produzido</label><select id="prodMaterial">${optMateriaisAgrupados('')}</select></div><div class="field"><label for="prodCategoria">Categoria automática</label><input type="text" id="prodCategoria" readonly></div><div class="field"><label for="prodUnidade">Unidade automática</label><input type="text" id="prodUnidade" readonly></div><div class="field"><label for="prodTipo">Tipo automático</label><input type="text" id="prodTipo" readonly></div><div class="field"><label for="prodQuantidade">Quantidade produzida</label><input type="number" id="prodQuantidade" placeholder="Informe a quantidade"></div><div class="field"><label for="prodCatadores">Equipe operacional</label><input type="number" id="prodCatadores" placeholder="Quantidade de pessoas"></div><div class="field"><label for="prodObs">Observações</label><textarea id="prodObs" placeholder="Informações complementares"></textarea></div></div><div class="btn-row"><button id="salvarProducao">${editProducaoId?'Atualizar Produção':'Salvar Produção'}</button><button id="cancelarProd" class="secondary" style="display:${editProducaoId?'inline-block':'none'}">Cancelar</button></div></div><div class="card-panel"><h3>🔎 Filtros e Indicadores de Produção</h3><div class="filter-bar"><div class="filter-field"><label>Mês</label><select id="fProdMes">${optMes('',true)}</select></div><div class="filter-field"><label>Ano</label><select id="fProdAno">${optAno()}</select></div><div class="filter-field"><label>Categoria</label><select id="fProdCategoria">${optCategorias()}</select></div><div class="filter-field"><label>Pesquisar material</label><input type="text" id="fProdBuscaMaterial" placeholder="Pesquisar"></div><div class="filter-field"><label>Material</label><select id="fProdMaterial">${optMateriais()}</select></div><div class="filter-field"><label>Tipo</label><select id="fProdTipo"><option value="">Todos os tipos</option><option>Bruto</option><option>Processado</option><option>Rejeito</option></select></div><button id="btnFiltrarProd" class="info">Filtrar</button><button id="btnLimparProd" class="secondary">Limpar</button></div><div id="indicadoresProducao"></div><div id="listaProducao"></div></div>`; document.getElementById('dynamic-view').innerHTML=html; document.getElementById('salvarProducao').onclick=salvarProducao; document.getElementById('cancelarProd').onclick=()=>{editProducaoId=null;renderProducao()}; document.getElementById('prodMaterial').onchange=()=>preencherMaterialProd(); document.getElementById('fProdBuscaMaterial').oninput=()=>atualizarListaMaterial('fProdMaterial','fProdBuscaMaterial',true); document.getElementById('btnFiltrarProd').onclick=listarProducoes; document.getElementById('btnLimparProd').onclick=()=>renderProducao(); preencherMaterialProd(); if(editProducaoId)popularFormProducao(editProducaoId); listarProducoes();}
 function preencherMaterialProd(){let mat=db.materiais.find(m=>m.nome===document.getElementById('prodMaterial').value); if(mat){document.getElementById('prodCategoria').value=mat.categoria; document.getElementById('prodUnidade').value=mat.unidade||'kg'; if(mat.tipoPadrao)document.getElementById('prodTipo').value=mat.tipoPadrao;}}
-function salvarProducao(){let data=prodData.value,material=prodMaterial.value,categoria=prodCategoria.value,unidade=prodUnidade.value||'kg',tipo=prodTipo.value,quantidade=Number(prodQuantidade.value),catadores=Number(prodCatadores.value)||0,observacoes=prodObs.value; if(!data||!material||!quantidade||quantidade<=0)return alert('Preencha data, material e quantidade.'); let item={id:editProducaoId||Date.now(),data,material,categoria,unidade,tipo,quantidade,catadores,produtividade:catadores?quantidade/catadores:0,observacoes}; if(editProducaoId){let i=db.producao.findIndex(p=>p.id===editProducaoId); if(i>=0)db.producao[i]=item; editProducaoId=null}else db.producao.push(item); salvarDB(); renderProducao();}
+function salvarProducao(){let data=prodData.value,material=prodMaterial.value,categoria=prodCategoria.value,unidade=prodUnidade.value||'kg',tipo=prodTipo.value,quantidade=Number(prodQuantidade.value),catadores=Number(prodCatadores.value)||0,observacoes=prodObs.value; if(!data||!material||!quantidade||quantidade<=0)return alert('Preencha data, material e quantidade.'); let item={id:editProducaoId||Date.now(),data,material,categoria,unidade,tipo,quantidade,catadores,produtividade:catadores?quantidade/catadores:0,observacoes}; if(editProducaoId){let i=db.producao.findIndex(p=>p.id===editProducaoId); if(i>=0)db.producao[i]=item; editProducaoId=null}else db.producao.push(item); salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editProducaoId?'Produção atualizada com sucesso.':'Produção registrada com sucesso.','sucesso'); renderProducao();}
 function popularFormProducao(id){let p=db.producao.find(x=>x.id===id); if(!p)return; prodData.value=p.data; prodMaterial.value=p.material; prodCategoria.value=p.categoria; prodUnidade.value=p.unidade; prodTipo.value=p.tipo; prodQuantidade.value=p.quantidade; prodCatadores.value=p.catadores||''; prodObs.value=p.observacoes||'';}
 function filtrarProducao(){let mes=fProdMes.value,ano=fProdAno.value,cat=fProdCategoria.value,mat=fProdMaterial.value,tipo=fProdTipo.value; return db.producao.filter(p=>mesmoMesAno(p.data,mes,ano)&&(!cat||p.categoria===cat)&&(!mat||p.material===mat)&&(!tipo||p.tipo===tipo));}
 function listarProducoes(){let lista=filtrarProducao(); let r=resumoProducao(lista); indicadoresProducao.innerHTML=`<div class="dashboard-cards"><div class="card"><div>Total válido</div><div class="card-value">${num(r.total)} kg</div></div><div class="card"><div>Processado</div><div class="card-value">${num(r.processado)} kg</div></div><div class="card"><div>Bruto</div><div class="card-value">${num(r.bruto)} kg</div></div><div class="card"><div>Rejeito</div><div class="card-value">${num(r.rejeito)} kg</div></div><div class="card"><div>Eficiência</div><div class="card-value">${num(r.eficiencia,1)}%</div></div><div class="card"><div>Maior categoria</div><div class="card-value">${r.topCat?escapeHtml(r.topCat[0]):'-'}</div><small>${r.topCat?num(r.topCat[1])+' kg':''}</small></div></div><div class="grid-2"><div class="card-panel"><h3>Produção por categoria</h3>${listaResumo(r.porCategoria)}</div><div class="card-panel"><h3>Produção por material</h3>${listaResumo(r.porMaterial,'kg',10)}</div></div>`; listaProducao.innerHTML=`<div class="table-wrap"><table><tr><th>Data</th><th>Material</th><th>Categoria</th><th>Tipo</th><th>Qtd</th><th>Catadores</th><th>Produtividade</th><th>Ações</th></tr>${lista.map(p=>`<tr><td>${formatarDataBR(p.data)}</td><td>${escapeHtml(p.material)}</td><td>${escapeHtml(p.categoria)}</td><td>${p.tipo}</td><td>${num(p.quantidade)} ${p.unidade||'kg'}</td><td>${p.catadores||'-'}</td><td>${num(p.produtividade,2)}</td><td><button class="mini-btn info" onclick="editarProducao(${p.id})">✏️ Editar</button> <button class="mini-btn danger" onclick="excluirProducao(${p.id})">🗑️ Excluir</button></td></tr>`).join('')||'<tr><td colspan="8">Sem lançamentos.</td></tr>'}</table></div>`;}
 function editarProducao(id){editProducaoId=id;renderProducao()} function excluirProducao(id){if(confirm('Excluir produção?')){db.producao=db.producao.filter(p=>p.id!==id);salvarDB();renderProducao()}}
-function renderVendas(){let html=`<div class="card-panel"><h2>${editVendaId?'✏️ Editar Venda':'💰 Registrar Venda'}</h2><div class="notice"><strong>Venda simplificada:</strong> escolha o material vendido em blocos por categoria, no mesmo padrão do módulo Produção. A categoria, unidade e tipo são preenchidos automaticamente.</div><div class="form-grid"><div class="field"><label for="vendaData">Data da venda</label><input type="date" id="vendaData"></div><div class="field"><label for="vendaMaterial">Material vendido</label><select id="vendaMaterial">${optMateriaisAgrupados('')}</select></div><div class="field"><label for="vendaCategoria">Categoria automática</label><input type="text" id="vendaCategoria" readonly></div><div class="field"><label for="vendaTipo">Tipo automático</label><input type="text" id="vendaTipo" readonly></div><div class="field"><label for="vendaUnidade">Unidade automática</label><input type="text" id="vendaUnidade" readonly></div><div class="field"><label for="vendaQuantidade">Quantidade vendida</label><input type="number" id="vendaQuantidade" placeholder="Informe a quantidade"></div><div class="field"><label for="vendaPrecoUnit">Preço unitário</label><input type="number" id="vendaPrecoUnit" placeholder="R$ por kg"></div><div class="field"><label for="vendaComprador">Comprador</label><input type="text" id="vendaComprador" placeholder="Nome do comprador"></div><div class="field"><label for="vendaObs">Observações</label><textarea id="vendaObs" placeholder="Informações complementares"></textarea></div></div><div class="btn-row"><button id="salvarVenda">${editVendaId?'Atualizar Venda':'Salvar Venda'}</button><button id="cancelarVenda" class="secondary" style="display:${editVendaId?'inline-block':'none'}">Cancelar</button></div></div><div class="card-panel"><h3>Vendas Realizadas</h3><div class="filter-bar"><div class="filter-field"><label>Mês</label><select id="fVendaMes">${optMes('',true)}</select></div><div class="filter-field"><label>Ano</label><select id="fVendaAno">${optAno()}</select></div><div class="filter-field"><label>Categoria</label><select id="fVendaCategoria">${optCategorias()}</select></div><div class="filter-field"><label>Material</label><select id="fVendaMaterial"><option value="">Todos</option>${optMateriaisAgrupados('')}</select></div><button id="btnVendaFiltro" class="info">Filtrar</button></div><div id="listaVendas"></div></div>`; dynamicView().innerHTML=html; salvarVenda.onclick=salvarVendaFn; cancelarVenda.onclick=()=>{editVendaId=null;renderVendas()}; btnVendaFiltro.onclick=listarVendas; vendaMaterial.onchange=preencherInfoVenda; preencherInfoVenda(); if(editVendaId)popularFormVenda(editVendaId); listarVendas();}
+function renderVendas(){let html=`<div class="card-panel"><h2>${editVendaId?'✏️ Editar Venda':'💰 Registrar Venda'}</h2><div class="notice"><strong>Venda simplificada:</strong> escolha o material vendido em blocos por categoria, no mesmo padrão do módulo Produção. A categoria, unidade e tipo são preenchidos automaticamente.</div><div class="form-grid"><div class="field"><label for="vendaData">Data da venda</label><input type="date" id="vendaData"></div><div class="field"><label for="vendaMaterial">Material vendido</label><select id="vendaMaterial">${optMateriaisAgrupados('')}</select></div><div class="field"><label for="vendaCategoria">Categoria automática</label><input type="text" id="vendaCategoria" readonly></div><div class="field"><label for="vendaTipo">Tipo automático</label><input type="text" id="vendaTipo" readonly></div><div class="field"><label for="vendaUnidade">Unidade automática</label><input type="text" id="vendaUnidade" readonly></div><div class="field"><label for="vendaQuantidade">Quantidade vendida</label><input type="number" id="vendaQuantidade" placeholder="Informe a quantidade"></div><div class="field"><label for="vendaPrecoUnit">Preço unitário</label><input type="number" id="vendaPrecoUnit" placeholder="R$ por kg"></div><div class="field"><label for="vendaComprador">Comprador</label><input type="text" id="vendaComprador" placeholder="Nome do comprador"></div><div class="field"><label for="vendaObs">Observações</label><textarea id="vendaObs" placeholder="Informações complementares"></textarea></div></div><div class="btn-row"><button id="salvarVenda">${editVendaId?'Atualizar Venda':'Salvar Venda'}</button><button id="cancelarVenda" class="secondary" style="display:${editVendaId?'inline-block':'none'}">Cancelar</button></div></div><div class="card-panel"><h3>💰 Filtros e Indicadores de Vendas</h3><div class="filter-bar"><div class="filter-field"><label>Mês</label><select id="fVendaMes">${optMes('',true)}</select></div><div class="filter-field"><label>Ano</label><select id="fVendaAno">${optAno()}</select></div><div class="filter-field"><label>Categoria</label><select id="fVendaCategoria">${optCategorias()}</select></div><div class="filter-field"><label>Material</label><select id="fVendaMaterial"><option value="">Todos</option>${optMateriaisAgrupados('')}</select></div><button id="btnVendaFiltro" class="info">Filtrar</button></div><div id="listaVendas"></div></div>`; dynamicView().innerHTML=html; salvarVenda.onclick=salvarVendaFn; cancelarVenda.onclick=()=>{editVendaId=null;renderVendas()}; btnVendaFiltro.onclick=listarVendas; vendaMaterial.onchange=preencherInfoVenda; preencherInfoVenda(); if(editVendaId)popularFormVenda(editVendaId); listarVendas();}
 function preencherInfoVenda(){let mat=db.materiais.find(m=>m.nome===document.getElementById('vendaMaterial').value); if(!mat)return; if(document.getElementById('vendaCategoria'))document.getElementById('vendaCategoria').value=mat.categoria||''; if(document.getElementById('vendaUnidade'))document.getElementById('vendaUnidade').value=mat.unidade||'kg'; if(document.getElementById('vendaTipo'))document.getElementById('vendaTipo').value=mat.tipoPadrao||'Bruto';}
 function dynamicView(){return document.getElementById('dynamic-view')}
 function salvarVendaFn(){let data=vendaData.value,material=vendaMaterial.value,qtd=Number(vendaQuantidade.value),precoUnit=Number(vendaPrecoUnit.value); if(!data||!material||!qtd||!precoUnit)return alert('Preencha data, material, quantidade e preço.'); let matCad=db.materiais.find(m=>m.nome===material)||{}; let categoria=vendaCategoria?.value||matCad.categoria||''; let unidade=vendaUnidade?.value||matCad.unidade||'kg'; let tipo=vendaTipo?.value||matCad.tipoPadrao||'Bruto'; let estoqueAtual=calcularEstoque().find(e=>e.material===material)?.saldo||0; let qtdOriginal=0; if(editVendaId){qtdOriginal=db.vendas.find(v=>v.id===editVendaId&&v.material===material)?.quantidade||0} if(qtd>estoqueAtual+qtdOriginal)return alert(`Estoque insuficiente. Disponível: ${num(estoqueAtual+qtdOriginal)} kg`); let item={id:editVendaId||Date.now(),data,material,categoria,unidade,tipo,quantidade:qtd,precoUnit,total:qtd*precoUnit,comprador:vendaComprador.value,observacoes:vendaObs.value}; if(editVendaId){let i=db.vendas.findIndex(v=>v.id===editVendaId); if(i>=0)db.vendas[i]=item; editVendaId=null}else db.vendas.push(item); salvarDB(); renderVendas();}
@@ -1097,7 +1171,23 @@ function graficoPizzaDespesas(lista,total){
 
 function renderDespesas(){let html=`<div class="card-panel"><h2>${editDespesaId?'✏️ Editar Despesa':'📉 Nova Despesa'}</h2><div class="notice"><strong>Controle seguro:</strong> despesas lançadas não são apagadas definitivamente. Ao excluir, o valor sai dos totais, mas o registro fica riscado com motivo da exclusão para auditoria.</div><div class="form-grid"><div class="field"><label for="despVenc">Data de vencimento</label><input type="date" id="despVenc"></div><div class="field"><label for="despPag">Data de pagamento</label><input type="date" id="despPag"></div><div class="field"><label for="despTipo">Descrição / tipo da despesa</label><input type="text" id="despTipo" placeholder="Ex.: Energia, aluguel, contador"><span id="despCategoriaFeedback" class="categoria-sugerida-feedback" aria-live="polite"></span></div><div class="field"><label for="despFornecedor">Fornecedor / credor</label><input type="text" id="despFornecedor" placeholder="Quem vai receber"></div><div class="field"><label for="despCategoria">Categoria da despesa</label><select id="despCategoria"><option>Administrativo</option><option>Operacional</option><option>Pessoal</option><option>Impostos e Taxas</option><option>Manutenção</option><option>Outros</option></select></div><div class="field"><label for="despValor">Valor da despesa</label><input type="number" id="despValor" placeholder="R$"></div><div class="field"><label for="despPagamento">Forma de pagamento</label><select id="despPagamento"><option>PIX</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option><option>Boleto</option><option>Transferência</option></select></div><div class="field"><label for="despDoc">Documento</label><input type="text" id="despDoc" placeholder="NF / recibo / contrato"></div><div class="field"><label for="despObs">Observações</label><textarea id="despObs" placeholder="Informações complementares"></textarea></div></div><div class="btn-row"><button id="salvarDespesa">${editDespesaId?'Atualizar Despesa':'Salvar Despesa'}</button><button id="cancelarDesp" class="secondary" style="display:${editDespesaId?'inline-block':'none'}">Cancelar</button></div></div><div class="card-panel"><h3>Controle de Despesas</h3><div class="filter-bar"><div class="filter-field"><label>Mês</label><select id="fDespMes">${optMes('',true)}</select></div><div class="filter-field"><label>Ano</label><select id="fDespAno">${optAno()}</select></div><div class="filter-field"><label>Status</label><select id="fDespStatus"><option value="">Todas</option><option>Pago</option><option>A Vencer</option><option>Vencido</option><option>Excluída</option></select></div><div class="filter-field"><label>Categoria</label><select id="fDespCategoria"><option value="">Todas categorias</option><option>Administrativo</option><option>Operacional</option><option>Pessoal</option><option>Impostos e Taxas</option><option>Manutenção</option><option>Outros</option></select></div><button id="btnDespFiltro" class="info">Filtrar</button><label class="switch-line"><input type="checkbox" id="fDespMostrarCanceladas"> Mostrar canceladas</label></div><div id="listaDespesas"></div></div>`; dynamicView().innerHTML=html; salvarDespesa.onclick=salvarDespesaFn; cancelarDesp.onclick=()=>{editDespesaId=null;renderDespesas()}; btnDespFiltro.onclick=listarDespesas; fDespMostrarCanceladas.onchange=listarDespesas; if(editDespesaId)popularFormDespesa(editDespesaId); configurarSugestaoCategoriaDespesa(); listarDespesas();}
 function salvarDespesaFn(){let anterior=editDespesaId?db.despesas.find(d=>d.id===editDespesaId):null; if(anterior&&anterior.excluida)return alert('Despesa excluída não pode ser editada. Lance uma nova despesa se necessário.'); let item={...(anterior||{}),id:editDespesaId||Date.now(),dataVencimento:despVenc.value,dataPagamento:despPag.value,tipo:despTipo.value,categoriaDesp:despCategoria.value,valor:Number(despValor.value),pagamento:despPagamento.value,fornecedor:despFornecedor.value,documento:despDoc.value,obs:despObs.value}; if(!item.dataVencimento||!item.tipo||!item.valor)return alert('Preencha vencimento, descrição e valor.'); item.situacao=item.dataPagamento?'Pago':'Pendente'; item.data=item.dataPagamento||item.dataVencimento; if(editDespesaId){let i=db.despesas.findIndex(d=>d.id===editDespesaId); if(i>=0)db.despesas[i]=item; editDespesaId=null}else db.despesas.push(item); salvarDB(); renderDespesas();}
-function popularFormDespesa(id){let d=db.despesas.find(x=>x.id===id); if(!d)return; despVenc.value=d.dataVencimento||d.data||''; despPag.value=d.dataPagamento||''; despTipo.value=d.tipo||''; despFornecedor.value=d.fornecedor||''; despCategoria.value=d.categoriaDesp||'Outros'; despValor.value=d.valor||''; despPagamento.value=d.pagamento||'PIX'; despDoc.value=d.documento||''; despObs.value=d.obs||'';}
+function popularFormDespesa(id){
+    let d=db.despesas.find(x=>x.id===id); if(!d)return;
+    despVenc.value=d.dataVencimento||d.data||'';
+    despPag.value=d.dataPagamento||'';
+    despTipo.value=d.tipo||'';
+    despFornecedor.value=d.fornecedor||'';
+    despCategoria.value=d.categoriaDesp||'Outros';
+    despValor.value=d.valor||'';
+    despPagamento.value=d.pagamento||'PIX';
+    despDoc.value=d.documento||'';
+    despObs.value=d.obs||'';
+    if(typeof despRecorrencia!=='undefined'){
+        despRecorrencia.value=d.recorrencia==='Mensal'?'Mensal':'Unica';
+        if(typeof despParcelas!=='undefined')despParcelas.value=d.parcelaTotal||12;
+        despRecorrencia.onchange();
+    }
+}
 function listarDespesas(){
     let mes=fDespMes.value,ano=fDespAno.value,status=fDespStatus.value,cat=fDespCategoria.value;
     let lista=db.despesas.filter(d=>{
@@ -1117,7 +1207,7 @@ function listarDespesas(){
 function editarDespesa(id){let d=db.despesas.find(x=>x.id===id); if(d&&d.excluida)return alert('Despesa excluída não pode ser editada. O registro foi mantido apenas para auditoria.'); editDespesaId=id;renderDespesas()} function excluirDespesa(id){let d=db.despesas.find(x=>x.id===id); if(!d)return; if(d.excluida)return alert('Esta despesa já está marcada como excluída.'); let motivo=prompt('Informe o motivo da exclusão desta despesa. O valor será removido dos totais, mas o registro continuará visível para auditoria:'); if(motivo===null)return; motivo=String(motivo).trim(); if(!motivo)return alert('Para excluir, informe o motivo.'); if(!confirm('Confirmar exclusão lógica? A despesa sairá dos totais, mas continuará visível riscada na lista.'))return; d.excluida=true; d.dataExclusao=hojeISO(); d.motivoExclusao=motivo; d.situacaoAntesExclusao=d.situacao||calcularStatusDespesa(d); salvarDB(); listarDespesas()} function pagarDespesa(id){let d=db.despesas.find(x=>x.id===id); if(!d)return; if(d.excluida)return alert('Despesa excluída não pode ser paga.'); if(!confirm('Confirmar pagamento desta despesa com a data de hoje?'))return; let data=hojeISO(); d.dataPagamento=data; d.situacao='Pago'; d.data=data; salvarDB(); listarDespesas()} function reabrirDespesa(id){if(!confirm('Remover pagamento e voltar a despesa para aberto?'))return; let d=db.despesas.find(x=>x.id===id); if(!d)return; if(d.excluida)return alert('Despesa excluída não pode ser reaberta.'); d.dataPagamento=''; d.situacao='Pendente'; d.data=d.dataVencimento; salvarDB(); listarDespesas()}
 function renderEstoque(){let estoque=calcularEstoque(); dynamicView().innerHTML=`<div class="card-panel"><h2>🏷️ Estoque Atual</h2><div class="notice">O estoque é calculado automaticamente: <strong>produção válida - vendas</strong>. Rejeito não entra no estoque comercial.</div><div class="table-wrap"><table><tr><th>Material</th><th>Produzido</th><th>Vendido</th><th>Saldo</th><th>Situação</th></tr>${estoque.map(e=>{let s=e.saldo>0?'Disponível':e.saldo===0?'Zerado':'Negativo';let cls=e.saldo>0?'status-good':e.saldo===0?'status-warning':'status-danger';return `<tr><td>${escapeHtml(e.material)}</td><td>${num(e.produzido)} kg</td><td>${num(e.vendido)} kg</td><td>${num(e.saldo)} kg</td><td class="${cls}">${s}</td></tr>`}).join('')||'<tr><td colspan="5">Sem estoque.</td></tr>'}</table></div></div>`;}
 function renderCooperados(){dynamicView().innerHTML=`<div class="card-panel"><h2>${editCoopId?'✏️ Editar Cooperado':'👥 Cadastro de Cooperados'}</h2><div class="notice"><strong>Ficha cadastral:</strong> registre os dados pessoais, operacionais e complementares do cooperado. A situação operacional define se ele entra ou não no cálculo de produtividade.</div><div class="form-section"><h3>Dados Pessoais</h3><div class="form-grid full"><div class="field"><label for="coopNome">Nome Completo do Cooperado</label><input id="coopNome" placeholder="Digite o nome completo"></div><div class="field"><label for="coopEndereco">Endereço completo</label><input id="coopEndereco" placeholder="Rua, número, complemento"></div></div><div class="form-grid three"><div class="field"><label for="coopCpf">CPF</label><input id="coopCpf" placeholder="000.000.000-00"></div><div class="field"><label for="coopRg">RG / Identidade</label><input id="coopRg" placeholder="Documento de identidade"></div><div class="field"><label for="coopTelefone">Telefone / WhatsApp</label><input id="coopTelefone" placeholder="(00) 00000-0000"></div></div><div class="form-grid four"><div class="field"><label for="coopBairro">Bairro</label><input id="coopBairro" placeholder="Bairro"></div><div class="field"><label for="coopCidade">Cidade</label><input id="coopCidade" placeholder="Cidade"></div><div class="field"><label for="coopUf">UF</label><input id="coopUf" placeholder="BA" maxlength="2"></div><div class="field"><label for="coopCep">CEP</label><input id="coopCep" placeholder="00000-000"></div></div><div class="form-grid three"><div class="field"><label for="coopNascimento">Data de nascimento</label><input type="date" id="coopNascimento"></div><div class="field"><label for="coopEmergencia">Contato de emergência</label><input id="coopEmergencia" placeholder="Nome e telefone"></div><div class="field"><label for="coopFoto">Foto do cooperado</label><input type="file" id="coopFoto" accept="image/*"></div></div></div><div class="form-section"><h3>Dados Operacionais</h3><div class="form-grid three"><div class="field"><label for="coopFuncao">Função</label><select id="coopFuncao"><option>Catador</option><option>Separador</option><option>Administrativo</option><option>Motorista</option><option>Prensista</option><option>Triagem</option></select></div><div class="field"><label for="coopTurno">Turno</label><input id="coopTurno" placeholder="Manhã, tarde ou integral"></div><div class="field"><label for="coopDataEntrada">Data de entrada</label><input type="date" id="coopDataEntrada"></div></div><div class="form-grid three"><div class="field"><label for="coopSituacao">Situação operacional</label><select id="coopSituacao"><option>Ativo</option><option>Inativo</option><option>Férias</option><option>Afastado</option><option>Atestado</option><option>Desligado</option></select></div><div class="field"><label for="coopMeta">Meta kg/mês</label><input type="number" id="coopMeta" placeholder="Meta mensal"></div><div class="field"><label for="coopAtivo">Conta para produtividade?</label><select id="coopAtivo"><option>Sim</option><option>Não</option></select></div></div></div><div class="form-section"><h3>Dados Bancários</h3><div class="form-grid four"><div class="field"><label for="coopBanco">Banco</label><input id="coopBanco" placeholder="Nome do banco"></div><div class="field"><label for="coopAgencia">Agência</label><input id="coopAgencia" placeholder="Agência"></div><div class="field"><label for="coopConta">Conta</label><input id="coopConta" placeholder="Conta"></div><div class="field"><label for="coopPix">Chave PIX</label><input id="coopPix" placeholder="CPF, telefone, e-mail ou chave"></div></div></div><div class="form-section"><h3>Documentos e Observações</h3><div class="form-grid three"><div class="field"><label for="coopDocEntregue">Documentos entregues?</label><select id="coopDocEntregue"><option>Não informado</option><option>Sim</option><option>Não</option></select></div><div class="field"><label for="coopTermo">Termo de adesão?</label><select id="coopTermo"><option>Não informado</option><option>Sim</option><option>Não</option></select></div><div class="field"><label for="coopObs">Observações</label><textarea id="coopObs" placeholder="Informações complementares"></textarea></div></div></div><div class="btn-row"><button id="salvarCoop">${editCoopId?'Atualizar Cooperado':'Salvar Cooperado'}</button><button id="cancelarCoop" class="secondary" style="display:${editCoopId?'inline-block':'none'}">Cancelar</button></div></div><div class="card-panel"><h3>Controle de Cooperados</h3><div id="indicadoresCoops"></div><div class="filter-bar"><div class="filter-field"><label>Situação</label><select id="fCoopStatus"><option value="">Todos</option><option>Ativo</option><option>Férias</option><option>Afastado</option><option>Atestado</option><option>Inativo</option><option>Desligado</option></select></div><button id="btnCoopFiltro" class="info">Filtrar</button></div><div id="listaCoops"></div></div>`; salvarCoop.onclick=salvarCoopFn; cancelarCoop.onclick=()=>{editCoopId=null;renderCooperados()}; btnCoopFiltro.onclick=listarCooperados; coopSituacao.onchange=()=>{coopAtivo.value=coopSituacao.value==='Ativo'?'Sim':'Não'}; if(editCoopId)popularFormCoop(editCoopId); listarCooperados();}
-function salvarCoopFn(){let item={id:editCoopId||Date.now(),nome:coopNome.value,cpf:coopCpf.value,rg:coopRg.value,telefone:coopTelefone.value,endereco:coopEndereco.value,bairro:coopBairro.value,cidade:coopCidade.value,uf:coopUf.value.toUpperCase(),cep:coopCep.value,nascimento:coopNascimento.value,emergencia:coopEmergencia.value,funcao:coopFuncao.value,ativo:coopAtivo.value,situacaoOperacional:coopSituacao.value,dataEntrada:coopDataEntrada.value,turno:coopTurno.value,meta:Number(coopMeta.value)||0,banco:coopBanco.value,agencia:coopAgencia.value,conta:coopConta.value,pix:coopPix.value,docEntregue:coopDocEntregue.value,termoAdesao:coopTermo.value,observacoes:coopObs.value}; if(!item.nome)return alert('Informe o nome completo do cooperado.'); if(item.situacaoOperacional==='Ativo')item.ativo='Sim'; if(['Inativo','Férias','Afastado','Atestado','Desligado'].includes(item.situacaoOperacional))item.ativo='Não'; if(editCoopId){let atual=db.cooperados.find(c=>c.id===editCoopId); if(atual&&atual.foto&&!item.foto)item.foto=atual.foto} let fotoFile=coopFoto.files&&coopFoto.files[0]; let finalizar=()=>{if(editCoopId){let i=db.cooperados.findIndex(c=>c.id===editCoopId); if(i>=0)db.cooperados[i]=item; editCoopId=null}else db.cooperados.push(item); salvarDB(); renderCooperados();}; if(fotoFile){let reader=new FileReader(); reader.onload=e=>{item.foto=e.target.result; finalizar()}; reader.readAsDataURL(fotoFile)}else finalizar();}
+function salvarCoopFn(){let item={id:editCoopId||Date.now(),nome:coopNome.value,cpf:coopCpf.value,rg:coopRg.value,telefone:coopTelefone.value,endereco:coopEndereco.value,bairro:coopBairro.value,cidade:coopCidade.value,uf:coopUf.value.toUpperCase(),cep:coopCep.value,nascimento:coopNascimento.value,emergencia:coopEmergencia.value,funcao:coopFuncao.value,ativo:coopAtivo.value,situacaoOperacional:coopSituacao.value,dataEntrada:coopDataEntrada.value,turno:coopTurno.value,meta:Number(coopMeta.value)||0,banco:coopBanco.value,agencia:coopAgencia.value,conta:coopConta.value,pix:coopPix.value,docEntregue:coopDocEntregue.value,termoAdesao:coopTermo.value,observacoes:coopObs.value}; if(!item.nome)return alert('Informe o nome completo do cooperado.'); if(item.situacaoOperacional==='Ativo')item.ativo='Sim'; if(['Inativo','Férias','Afastado','Atestado','Desligado'].includes(item.situacaoOperacional))item.ativo='Não'; if(editCoopId){let atual=db.cooperados.find(c=>c.id===editCoopId); if(atual&&atual.foto&&!item.foto)item.foto=atual.foto} let fotoFile=coopFoto.files&&coopFoto.files[0]; let finalizar=()=>{if(editCoopId){let i=db.cooperados.findIndex(c=>c.id===editCoopId); if(i>=0)db.cooperados[i]=item; editCoopId=null}else db.cooperados.push(item); salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editCoopId?'Cooperado atualizado com sucesso.':'Cooperado salvo com sucesso.','sucesso'); renderCooperados();}; if(fotoFile){let reader=new FileReader(); reader.onload=e=>{item.foto=e.target.result; finalizar()}; reader.readAsDataURL(fotoFile)}else finalizar();}
 function popularFormCoop(id){let c=db.cooperados.find(x=>x.id===id); if(!c)return; coopNome.value=c.nome||''; coopCpf.value=c.cpf||''; coopRg.value=c.rg||''; coopTelefone.value=c.telefone||''; coopEndereco.value=c.endereco||''; coopBairro.value=c.bairro||''; coopCidade.value=c.cidade||''; coopUf.value=c.uf||''; coopCep.value=c.cep||''; coopNascimento.value=c.nascimento||''; coopEmergencia.value=c.emergencia||''; coopFuncao.value=c.funcao||'Catador'; coopAtivo.value=c.ativo||'Sim'; coopSituacao.value=c.situacaoOperacional||'Ativo'; coopDataEntrada.value=c.dataEntrada||''; coopTurno.value=c.turno||''; coopMeta.value=c.meta||''; coopBanco.value=c.banco||''; coopAgencia.value=c.agencia||''; coopConta.value=c.conta||''; coopPix.value=c.pix||''; coopDocEntregue.value=c.docEntregue||'Não informado'; coopTermo.value=c.termoAdesao||'Não informado'; coopObs.value=c.observacoes||'';}
 function coopStatusChip(status){let st=status||'Inativo'; let cls=st==='Ativo'?'coop-ativo':st==='Férias'?'coop-ferias':st==='Atestado'?'coop-atestado':st==='Afastado'?'coop-afastado':st==='Desligado'?'coop-desligado':'coop-inativo'; return `<span class="coop-chip ${cls}">${escapeHtml(st)}</span>`}
 function listarCooperados(){let filtro=document.getElementById('fCoopStatus')?.value||''; let lista=db.cooperados.filter(c=>!filtro||c.situacaoOperacional===filtro); let cont={Ativo:0,Férias:0,Afastado:0,Atestado:0,Inativo:0,Desligado:0}; db.cooperados.forEach(c=>{let st=c.situacaoOperacional||'Inativo'; if(cont[st]!==undefined)cont[st]++}); indicadoresCoops.innerHTML=`<div class="dashboard-cards"><div class="card"><div>Ativos</div><div class="card-value">${cont.Ativo}</div></div><div class="card"><div>Férias</div><div class="card-value">${cont['Férias']}</div></div><div class="card"><div>Afastados</div><div class="card-value">${cont.Afastado}</div></div><div class="card"><div>Atestados</div><div class="card-value">${cont.Atestado}</div></div><div class="card"><div>Inativos</div><div class="card-value">${cont.Inativo+cont.Desligado}</div></div></div>`; listaCoops.innerHTML=`<div class="coop-card-grid">${lista.map(c=>{let st=c.situacaoOperacional||'Inativo';return `<div class="coop-card"><div class="coop-card-header"><div><div class="coop-card-name">${escapeHtml(c.nome||'Sem nome')}</div><div class="coop-card-sub">${escapeHtml(c.funcao||'Função não informada')} • ${escapeHtml(c.turno||'Turno não informado')} • Entrada: ${escapeHtml(formatarDataBR(c.dataEntrada)||'-')}</div></div><div>${coopStatusChip(st)}</div></div><div class="coop-data-grid"><div class="coop-data-item wide"><div class="info-label">Endereço</div><div class="info-value">${escapeHtml(c.endereco||'-')}</div></div><div class="coop-data-item"><div class="info-label">CPF</div><div class="info-value">${escapeHtml(c.cpf||'-')}</div></div><div class="coop-data-item"><div class="info-label">RG</div><div class="info-value">${escapeHtml(c.rg||'-')}</div></div><div class="coop-data-item"><div class="info-label">Telefone</div><div class="info-value">${escapeHtml(c.telefone||'-')}</div></div><div class="coop-data-item"><div class="info-label">Bairro</div><div class="info-value">${escapeHtml(c.bairro||'-')}</div></div><div class="coop-data-item"><div class="info-label">Cidade/UF</div><div class="info-value">${escapeHtml((c.cidade||'-')+(c.uf?' / '+c.uf:''))}</div></div><div class="coop-data-item"><div class="info-label">Meta</div><div class="info-value">${num(c.meta||0)} kg/mês</div></div><div class="coop-data-item"><div class="info-label">PIX</div><div class="info-value">${escapeHtml(c.pix||'-')}</div></div><div class="coop-data-item"><div class="info-label">Documentos</div><div class="info-value">${escapeHtml(c.docEntregue||'Não informado')}</div></div>${c.observacoes?`<div class="coop-data-item full"><div class="info-label">Observações</div><div class="info-value">${escapeHtml(c.observacoes)}</div></div>`:''}</div><div class="coop-card-footer"><div class="coop-mini-note">Conta para produtividade: <strong>${escapeHtml(c.ativo||'Não')}</strong></div><div class="coop-actions-line"><button class="mini-btn info" onclick="editarCoop(${c.id})">✏️ Editar</button><select class="coop-status-select" onchange="alterarStatusCoop(${c.id},this.value,this.value==='Ativo'?'Sim':'Não')"><option value="Ativo" ${st==='Ativo'?'selected':''}>Ativo</option><option value="Férias" ${st==='Férias'?'selected':''}>Férias</option><option value="Afastado" ${st==='Afastado'?'selected':''}>Afastado</option><option value="Atestado" ${st==='Atestado'?'selected':''}>Atestado</option><option value="Inativo" ${st==='Inativo'?'selected':''}>Inativo</option><option value="Desligado" ${st==='Desligado'?'selected':''}>Desligado</option></select><button class="mini-btn danger" onclick="excluirCoop(${c.id})">🗑️ Excluir</button></div></div></div>`}).join('')||'<div class="empty">Sem cooperados.</div>'}</div>`;}
@@ -1141,7 +1231,7 @@ function dadosCooperativaRelatorio(){
 function blocoCadastroCooperativa(){let c=db.cooperativa||{};return `<div class="card-panel"><h2>🏢 Dados da Cooperativa</h2><div class="notice"><strong>Importante:</strong> esses dados aparecem no cabeçalho do Relatório Executivo e ajudam a identificar o documento quando for salvo em PDF ou enviado ao Sebrae.</div><div class="form-grid"><div class="field"><label for="cadCoopNome">Nome da cooperativa</label><input id="cadCoopNome" value="${escapeHtml(c.nome||'')}" placeholder="Nome completo da cooperativa"></div><div class="field"><label for="cadCoopCnpj">CNPJ</label><input id="cadCoopCnpj" value="${escapeHtml(c.cnpj||'')}" placeholder="00.000.000/0000-00"></div><div class="field"><label for="cadCoopMunicipio">Município</label><input id="cadCoopMunicipio" value="${escapeHtml(c.municipio||'')}" placeholder="Município"></div><div class="field"><label for="cadCoopUf">UF</label><input id="cadCoopUf" value="${escapeHtml(c.uf||'')}" maxlength="2" placeholder="BA"></div><div class="field"><label for="cadCoopTelefone">Telefone / WhatsApp</label><input id="cadCoopTelefone" value="${escapeHtml(c.telefone||'')}" placeholder="(00) 00000-0000"></div><div class="field"><label for="cadCoopEmail">E-mail</label><input id="cadCoopEmail" value="${escapeHtml(c.email||'')}" placeholder="email@cooperativa.com.br"></div><div class="field"><label for="cadCoopPresidente">Presidente / responsável</label><input id="cadCoopPresidente" value="${escapeHtml(c.presidente||'')}" placeholder="Nome do responsável"></div></div><div class="btn-row"><button id="salvarDadosCooperativa" class="info">Salvar Dados da Cooperativa</button></div></div>`;}
 function salvarDadosCooperativaFn(){db.cooperativa={nome:cadCoopNome.value.trim(),cnpj:cadCoopCnpj.value.trim(),municipio:cadCoopMunicipio.value.trim(),uf:cadCoopUf.value.trim().toUpperCase(),telefone:cadCoopTelefone.value.trim(),email:cadCoopEmail.value.trim(),presidente:cadCoopPresidente.value.trim()}; salvarDB(); alert('Dados da cooperativa salvos.'); renderCadastros();}
 function renderCadastros(){dynamicView().innerHTML=blocoCadastroCooperativa()+`<div class="card-panel"><h2>${editMaterialNome?'✏️ Editar Material':'⚙️ Cadastro de Materiais'}</h2><div class="notice"><strong>Lista oficial pré-cadastrada:</strong> os materiais já entram com categoria, unidade e tipo padrão. Nos lançamentos, essas informações são preenchidas automaticamente.</div><div class="form-grid"><div class="field"><label for="novoMaterial">Nome do material</label><input id="novoMaterial" placeholder="Ex.: PET, papelão, alumínio"></div><div class="field"><label for="novaCategoria">Categoria</label><select id="novaCategoria">${db.categorias.map(c=>`<option>${escapeHtml(c)}</option>`).join('')}</select></div><div class="field"><label for="novaUnidade">Unidade de medida</label><input id="novaUnidade" placeholder="Ex.: kg" value="kg"></div><div class="field"><label for="novoTipoPadrao">Tipo padrão</label><select id="novoTipoPadrao"><option>Bruto</option><option>Processado</option><option>Rejeito</option></select></div></div><div class="btn-row"><button id="addMaterial">${editMaterialNome?'Atualizar Material':'Adicionar Material'}</button><button id="cancelarMat" class="secondary" style="display:${editMaterialNome?'inline-block':'none'}">Cancelar</button></div><hr style="margin:1rem 0;border:none;border-top:1px solid #e1e6eb"><div class="filter-bar"><div class="filter-field"><label>Pesquisar material</label><input type="text" id="buscaListaMateriais" placeholder="Digite para localizar"></div><div class="filter-field"><label>Categoria</label><select id="fMatCategoria">${optCategorias()}</select></div><div class="filter-field"><label>Tipo</label><select id="fMatTipo"><option value="">Todos</option><option>Bruto</option><option>Processado</option><option>Rejeito</option></select></div><button id="btnFiltrarMateriais" class="info">Filtrar</button></div><div id="listaMateriais"></div></div>`; document.getElementById('salvarDadosCooperativa').onclick=salvarDadosCooperativaFn; addMaterial.onclick=salvarMaterial; cancelarMat.onclick=()=>{editMaterialNome=null;renderCadastros()}; btnFiltrarMateriais.onclick=listarMateriais; buscaListaMateriais.oninput=listarMateriais; fMatCategoria.onchange=listarMateriais; fMatTipo.onchange=listarMateriais; if(editMaterialNome)popularMaterial(editMaterialNome); listarMateriais();}
-function salvarMaterial(){let nome=novoMaterial.value.trim().toUpperCase(); if(!nome)return alert('Informe o material.'); if(!editMaterialNome&&db.materiais.some(m=>m.nome===nome))return alert('Material já existe.'); let item={nome,categoria:novaCategoria.value,unidade:novaUnidade.value||'kg',tipoPadrao:novoTipoPadrao.value}; if(editMaterialNome){let i=db.materiais.findIndex(m=>m.nome===editMaterialNome); if(i>=0){db.producao.forEach(p=>{if(p.material===editMaterialNome){p.material=nome;p.categoria=item.categoria;p.unidade=item.unidade}}); db.vendas.forEach(v=>{if(v.material===editMaterialNome)v.material=nome}); db.materiais[i]=item;} editMaterialNome=null}else db.materiais.push(item); salvarDB(); renderCadastros();}
+function salvarMaterial(){let nome=novoMaterial.value.trim().toUpperCase(); if(!nome)return alert('Informe o material.'); if(!editMaterialNome&&db.materiais.some(m=>m.nome===nome))return alert('Material já existe.'); let item={nome,categoria:novaCategoria.value,unidade:novaUnidade.value||'kg',tipoPadrao:novoTipoPadrao.value}; if(editMaterialNome){let i=db.materiais.findIndex(m=>m.nome===editMaterialNome); if(i>=0){db.producao.forEach(p=>{if(p.material===editMaterialNome){p.material=nome;p.categoria=item.categoria;p.unidade=item.unidade}}); db.vendas.forEach(v=>{if(v.material===editMaterialNome)v.material=nome}); db.materiais[i]=item;} editMaterialNome=null}else db.materiais.push(item); salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editMaterialNome?'Material atualizado com sucesso.':'Material salvo com sucesso.','sucesso'); renderCadastros();}
 function popularMaterial(nome){let m=db.materiais.find(x=>x.nome===nome); if(!m)return; novoMaterial.value=m.nome; novaCategoria.value=m.categoria; novaUnidade.value=m.unidade||'kg'; novoTipoPadrao.value=m.tipoPadrao||'Processado';}
 function listarMateriais(){let q=document.getElementById('buscaListaMateriais')?.value?.toLowerCase()||'';let cat=document.getElementById('fMatCategoria')?.value||'';let tipo=document.getElementById('fMatTipo')?.value||'';let lista=db.materiais.filter(m=>(!q||m.nome.toLowerCase().includes(q)||m.categoria.toLowerCase().includes(q))&&(!cat||m.categoria===cat)&&(!tipo||m.tipoPadrao===tipo));listaMateriais.innerHTML=`<div class="notice"><strong>${lista.length}</strong> materiais encontrados de <strong>${db.materiais.length}</strong> cadastrados.</div><table><tr><th>Material</th><th>Categoria</th><th>Unidade</th><th>Tipo padrão</th><th>Ações</th></tr>${lista.map(m=>`<tr><td>${escapeHtml(m.nome)}</td><td>${escapeHtml(m.categoria)}</td><td>${escapeHtml(m.unidade||'kg')}</td><td>${escapeHtml(m.tipoPadrao||'Processado')}</td><td><button class="mini-btn info" onclick="editarMaterial('${escapeHtml(m.nome)}')">✏️ Editar</button> <button class="mini-btn danger" onclick="excluirMaterial('${escapeHtml(m.nome)}')">🗑️ Excluir</button></td></tr>`).join('')||'<tr><td colspan="5">Nenhum material encontrado.</td></tr>'}</table>`;}
 function editarMaterial(nome){editMaterialNome=nome.replace(/&#39;/g,"'").replace(/&amp;/g,'&');renderCadastros()} function excluirMaterial(nome){nome=nome.replace(/&#39;/g,"'").replace(/&amp;/g,'&'); if(db.producao.some(p=>p.material===nome)||db.vendas.some(v=>v.material===nome))return alert('Não é possível excluir material com produção ou venda lançada. Edite ou inative futuramente.'); if(confirm('Excluir material?')){db.materiais=db.materiais.filter(m=>m.nome!==nome);salvarDB();renderCadastros()}}
@@ -1601,7 +1691,7 @@ function renderGuiaUtilizacao(){
 }
 function guiaModuloHTML(m,idx){
     return `<div id="guiaModulo_${escapeHtml(m.view)}" class="guide-section" data-guide-module="${escapeHtml(m.view)}" data-guide-text="${escapeHtml((m.title+' '+m.short+' '+m.finalidade+' '+m.serve+' '+m.passos.join(' ')+' '+m.infos.join(' ')+' '+m.perguntas.join(' ')+' '+m.boas.join(' ')).toLowerCase())}">
-        <details class="guide-accordion" ${idx<2?'open':''}>
+        <details class="guide-accordion">
             <summary><span class="guide-accordion-title"><span class="guide-accordion-icon">${m.icon}</span><span>${escapeHtml(m.title)}</span></span></summary>
             <div class="guide-accordion-body">
                 <div class="guide-info-grid">
@@ -1644,7 +1734,17 @@ function inicializarInteracoesGuia(){
         el.addEventListener('keydown',(ev)=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();ev.stopPropagation();acionar(el);}});
     });
     document.querySelectorAll('.guide-accordion summary').forEach(sum=>{
-        sum.addEventListener('click',(ev)=>{ev.stopPropagation();});
+        sum.addEventListener('click',(ev)=>{
+            ev.stopPropagation();
+            const atual=sum.closest('details');
+            if(!atual)return;
+            const vaiAbrir=!atual.open;
+            if(vaiAbrir){
+                document.querySelectorAll('.guide-accordion[open]').forEach(det=>{
+                    if(det!==atual)det.open=false;
+                });
+            }
+        });
     });
 }
 function guiaIrPara(id){
@@ -1661,6 +1761,7 @@ function guiaAbrirModulo(view){
     document.querySelectorAll('.guide-section').forEach(sec=>sec.style.display='block');
     const alvo=document.getElementById('guiaModulo_'+view);
     if(!alvo)return;
+    document.querySelectorAll('.guide-accordion[open]').forEach(d=>d.open=false);
     const det=alvo.querySelector('details');
     if(det)det.open=true;
     guiaIrPara('guiaModulo_'+view);
@@ -1682,8 +1783,7 @@ function filtrarGuiaUtilizacao(){
         }
     });
     if(!termo){
-        const primeiros=[...document.querySelectorAll('.guide-accordion')].slice(0,2);
-        primeiros.forEach(d=>d.open=true);
+        document.querySelectorAll('.guide-accordion').forEach(d=>d.open=false);
     }
     const vazio=document.getElementById('guiaSemResultado');
     if(vazio)vazio.style.display=visiveis?'none':'block';
@@ -1820,12 +1920,12 @@ function salvarProducao(){
     let item={id:editProducaoId||Date.now(),data,material,categoria,unidade,tipo,quantidade,catadores,produtividade:catadores?quantidade/catadores:0,observacoes};
     aplicarAuditoriaSalvar(item,atual);
     if(editProducaoId){let i=db.producao.findIndex(p=>p.id===editProducaoId); if(i>=0)db.producao[i]=item; editProducaoId=null}else db.producao.push(item);
-    salvarDB(); renderProducao();
+    salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editProducaoId?'Produção atualizada com sucesso.':'Produção registrada com sucesso.','sucesso'); renderProducao();
 }
 function listarProducoes(){
     inserirFiltroCancelados(document.querySelector('#listaProducao')?.closest('.card-panel'),'fProdMostrarCancelados','Mostrar canceladas',listarProducoes);
     let mostrar=garantirFiltroCancelados('fProdMostrarCancelados',listarProducoes);
-    let lista=filtrarProducao().filter(p=>mostrar||registroAtivo(p));
+    let lista=filtrarProducao().filter(p=>mostrar||registroAtivo(p)).sort((a,b)=>compararDataDesc(a.data,b.data)||compararIdDesc(a,b));
     let listaIndicadores=lista.filter(registroAtivo);
     let r=resumoProducao(listaIndicadores);
     indicadoresProducao.innerHTML=`<div class="dashboard-cards"><div class="card"><div>Total válido</div><div class="card-value">${num(r.total)} kg</div></div><div class="card"><div>Processado</div><div class="card-value">${num(r.processado)} kg</div></div><div class="card"><div>Bruto</div><div class="card-value">${num(r.bruto)} kg</div></div><div class="card"><div>Rejeito</div><div class="card-value">${num(r.rejeito)} kg</div></div><div class="card"><div>Eficiência</div><div class="card-value">${num(r.eficiencia,1)}%</div></div><div class="card"><div>Maior categoria</div><div class="card-value">${r.topCat?escapeHtml(r.topCat[0]):'-'}</div><small>${r.topCat?num(r.topCat[1])+' kg':''}</small></div></div><div class="grid-2"><div class="card-panel"><h3>Produção por categoria</h3>${listaResumo(r.porCategoria)}</div><div class="card-panel"><h3>Produção por material</h3>${listaResumo(r.porMaterial,'kg',10)}</div></div>`;
@@ -1849,13 +1949,13 @@ function salvarVendaFn(){
     let item={id:editVendaId||Date.now(),data,material,categoria,tipo,unidade,quantidade:qtd,precoUnit,total:qtd*precoUnit,comprador:vendaComprador.value,observacoes:vendaObs.value};
     aplicarAuditoriaSalvar(item,atual);
     if(editVendaId){let i=db.vendas.findIndex(v=>v.id===editVendaId); if(i>=0)db.vendas[i]=item; editVendaId=null}else db.vendas.push(item);
-    salvarDB();renderVendas();
+    salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editVendaId?'Venda atualizada com sucesso.':'Venda registrada com sucesso.','sucesso');renderVendas();
 }
 function listarVendas(){
     inserirFiltroCancelados(document.querySelector('#listaVendas')?.closest('.card-panel'),'fVendaMostrarCanceladas','Mostrar canceladas',listarVendas);
     let mostrar=garantirFiltroCancelados('fVendaMostrarCanceladas',listarVendas);
     let mes=fVendaMes.value,ano=fVendaAno.value,cat=fVendaCategoria.value,mat=fVendaMaterial.value;
-    let lista=db.vendas.filter(v=>{let matCad=db.materiais.find(m=>m.nome===v.material)||{};let categoria=v.categoria||matCad.categoria||'';return mesmoMesAno(v.data,mes,ano)&&(!cat||categoria===cat)&&(!mat||v.material===mat)&&(mostrar||registroAtivo(v))});
+    let lista=db.vendas.filter(v=>{let matCad=db.materiais.find(m=>m.nome===v.material)||{};let categoria=v.categoria||matCad.categoria||'';return mesmoMesAno(v.data,mes,ano)&&(!cat||categoria===cat)&&(!mat||v.material===mat)&&(mostrar||registroAtivo(v))}).sort((a,b)=>compararDataDesc(a.data,b.data)||compararIdDesc(a,b));
     let listaTotais=lista.filter(registroAtivo);
     let qtdTotal=listaTotais.reduce((a,v)=>a+Number(v.quantidade||0),0), fatTotal=listaTotais.reduce((a,v)=>a+Number(v.total||0),0);
     listaVendas.innerHTML=`<div class="notice"><strong>Total vendido:</strong> ${num(qtdTotal)} kg &nbsp; | &nbsp; <strong>Faturamento:</strong> ${moeda(fatTotal)} &nbsp; | &nbsp; <strong>Preço médio:</strong> ${moeda(fatTotal/(qtdTotal||1))}/kg <span class="muted">(somente registros ativos)</span></div><div class="table-wrap"><table><tr><th>Data</th><th>Material</th><th>Categoria</th><th>Tipo</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Comprador</th><th>Status</th><th>Ações</th></tr>${lista.map(v=>{let matCad=db.materiais.find(m=>m.nome===v.material)||{};let cancelado=registroCancelado(v);return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(v.data)}</td><td>${escapeHtml(v.material)}${detalhesCancelamento(v)}</td><td>${escapeHtml(v.categoria||matCad.categoria||'')}</td><td>${escapeHtml(v.tipo||matCad.tipoPadrao||'Bruto')}</td><td>${num(v.quantidade)} ${escapeHtml(v.unidade||matCad.unidade||'kg')}</td><td>${moeda(v.precoUnit)}</td><td>${moeda(v.total)}</td><td>${escapeHtml(v.comprador||'')}</td><td>${cancelado?'<span class="status-chip chip-cancelado">CANCELADO</span>':'<span class="status-chip chip-pago">ATIVO</span>'}</td><td>${cancelado?'<span class="muted">Auditoria</span>':`<button class="mini-btn info" onclick="editarVenda(${v.id})">✏️ Editar</button> <button class="mini-btn danger" onclick="excluirVenda(${v.id})">🚫 Cancelar</button>`}</td></tr>`}).join('')||'<tr><td colspan="10">Sem vendas.</td></tr>'}</table></div>`;
@@ -1873,7 +1973,7 @@ function salvarCoopFn(){
     if(atual&&atual.foto&&!item.foto)item.foto=atual.foto;
     aplicarAuditoriaSalvar(item,atual);
     let fotoFile=coopFoto.files&&coopFoto.files[0];
-    let finalizar=()=>{if(editCoopId){let i=db.cooperados.findIndex(c=>c.id===editCoopId); if(i>=0)db.cooperados[i]=item; editCoopId=null}else db.cooperados.push(item); salvarDB(); renderCooperados();};
+    let finalizar=()=>{if(editCoopId){let i=db.cooperados.findIndex(c=>c.id===editCoopId); if(i>=0)db.cooperados[i]=item; editCoopId=null}else db.cooperados.push(item); salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editCoopId?'Cooperado atualizado com sucesso.':'Cooperado salvo com sucesso.','sucesso'); renderCooperados();};
     if(fotoFile){let reader=new FileReader(); reader.onload=e=>{item.foto=e.target.result; finalizar()}; reader.readAsDataURL(fotoFile)}else finalizar();
 }
 function cooperadosAtivosLista(){return db.cooperados.filter(c=>registroAtivo(c)&&c.ativo==='Sim'&&c.situacaoOperacional==='Ativo')}
@@ -1920,7 +2020,7 @@ function salvarOcorrenciaSaude(){
         return alert('Informe a data de retorno/encerramento ou mantenha o status como Afastado.');
     }
 
-    // V26.5.8B - Trava real: impede nova ocorrência quando já há afastamento ativo
+    // V26.5.9 - Trava real: impede nova ocorrência quando já há afastamento ativo
     // A validação fica ANTES de gravar no db.ocorrenciasSaude.
     const afastamentoAtivo = encontrarAfastamentoAtivoCooperado(ocCoop.value, editOcorrenciaId);
     if(!editOcorrenciaId && afastamentoAtivo){
@@ -1979,16 +2079,31 @@ function badgeStatusDespesa(s){let cls=s==='Pago'?'chip-pago':s==='Vencido'?'chi
 function editarDespesa(id){let d=db.despesas.find(x=>String(x.id)===String(id)); if(d&&(registroCancelado(d)||d.excluida))return alert('Despesa cancelada não pode ser editada. O registro foi mantido apenas para auditoria.'); editDespesaId=id;renderDespesas()}
 function excluirDespesa(id){cancelarRegistro('despesas',id,listarDespesas)}
 function renderDespesas(){
-    let html=`<div class="card-panel"><h2>${editDespesaId?'✏️ Editar Despesa':'📉 Nova Despesa'}</h2><div class="notice"><strong>Controle seguro:</strong> despesas lançadas não são apagadas definitivamente. Ao cancelar, o valor sai dos totais, mas o registro permanece preservado para auditoria.</div><div class="form-grid"><div class="field"><label for="despVenc">Data de vencimento</label><input type="date" id="despVenc"></div><div class="field"><label for="despPag">Data de pagamento</label><input type="date" id="despPag"></div><div class="field"><label for="despTipo">Descrição / tipo da despesa</label><input type="text" id="despTipo" placeholder="Ex.: Energia, aluguel, contador"><span id="despCategoriaFeedback" class="categoria-sugerida-feedback" aria-live="polite"></span></div><div class="field"><label for="despFornecedor">Fornecedor / credor</label><input type="text" id="despFornecedor" placeholder="Quem vai receber"></div><div class="field"><label for="despCategoria">Categoria da despesa</label><select id="despCategoria"><option>Administrativo</option><option>Operacional</option><option>Pessoal</option><option>Impostos e Taxas</option><option>Manutenção</option><option>Outros</option></select></div><div class="field"><label for="despValor">Valor da despesa</label><input type="number" id="despValor" placeholder="R$"></div><div class="field"><label for="despPagamento">Forma de pagamento</label><select id="despPagamento"><option>PIX</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option><option>Boleto</option><option>Transferência</option></select></div><div class="field"><label for="despDoc">Documento</label><input type="text" id="despDoc" placeholder="NF / recibo / contrato"></div><div class="field"><label for="despObs">Observações</label><textarea id="despObs" placeholder="Informações complementares"></textarea></div></div><div class="btn-row"><button id="salvarDespesa">${editDespesaId?'Atualizar Despesa':'Salvar Despesa'}</button><button id="cancelarDesp" class="secondary" style="display:${editDespesaId?'inline-block':'none'}">Cancelar edição</button></div></div><div class="card-panel"><h3>Controle de Despesas</h3><div class="filter-bar"><div class="filter-field"><label>Mês</label><select id="fDespMes">${optMes('',true)}</select></div><div class="filter-field"><label>Ano</label><select id="fDespAno">${optAno()}</select></div><div class="filter-field"><label>Status</label><select id="fDespStatus"><option value="">Todas</option><option>Pago</option><option>A Vencer</option><option>Vencido</option><option>Cancelada</option></select></div><div class="filter-field"><label>Categoria</label><select id="fDespCategoria"><option value="">Todas categorias</option><option>Administrativo</option><option>Operacional</option><option>Pessoal</option><option>Impostos e Taxas</option><option>Manutenção</option><option>Outros</option></select></div><button id="btnDespFiltro" class="info">Filtrar</button><label class="switch-line"><input type="checkbox" id="fDespMostrarCanceladas"> Mostrar canceladas</label></div><div id="listaDespesas"></div></div>`;
-    document.getElementById('dynamic-view').innerHTML=html;
-    salvarDespesa.onclick=salvarDespesaFn; cancelarDesp.onclick=()=>{editDespesaId=null;renderDespesas()}; btnDespFiltro.onclick=listarDespesas; fDespMostrarCanceladas.onchange=listarDespesas;
-    if(editDespesaId)popularFormDespesa(editDespesaId); configurarSugestaoCategoriaDespesa(); listarDespesas();
+    let html=`<div class="card-panel"><h2>${editDespesaId?'✏️ Editar Despesa':'📉 Nova Despesa'}</h2><div class="notice"><strong>Controle seguro:</strong> despesas lançadas não são apagadas definitivamente. Ao cancelar, o valor sai dos totais, mas o registro permanece preservado para auditoria.</div><div class="form-grid"><div class="field"><label for="despVenc">Data de vencimento</label><input type="date" id="despVenc"></div><div class="field"><label for="despPag">Data de pagamento</label><input type="date" id="despPag"></div><div class="field"><label for="despTipo">Descrição / tipo da despesa</label><input type="text" id="despTipo" placeholder="Ex.: Energia, aluguel, contador"><span id="despCategoriaFeedback" class="categoria-sugerida-feedback" aria-live="polite"></span></div><div class="field"><label for="despFornecedor">Fornecedor / credor</label><input type="text" id="despFornecedor" placeholder="Quem vai receber"></div><div class="field"><label for="despCategoria">Categoria da despesa</label><select id="despCategoria"><option>Administrativo</option><option>Operacional</option><option>Pessoal</option><option>Impostos e Taxas</option><option>Manutenção</option><option>Outros</option></select></div><div class="field"><label for="despValor">Valor da despesa</label><input type="number" id="despValor" placeholder="R$"></div><div class="field"><label for="despPagamento">Forma de pagamento</label><select id="despPagamento"><option>PIX</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option><option>Boleto</option><option>Transferência</option></select></div><div class="field"><label for="despDoc">Documento</label><input type="text" id="despDoc" placeholder="NF / recibo / contrato"></div><div class="field"><label for="despRecorrencia">Tipo de despesa</label><select id="despRecorrencia"><option value="Unica">Despesa única</option><option value="Mensal">Despesa recorrente mensal</option></select></div><div class="field" id="campoParcelasDesp" style="display:none"><label for="despParcelas">Quantidade de parcelas</label><input type="number" id="despParcelas" min="2" max="60" value="12"></div><div class="field"><label for="despObs">Observações</label><textarea id="despObs" placeholder="Informações complementares"></textarea></div></div><div class="btn-row"><button id="salvarDespesa">${editDespesaId?'Atualizar Despesa':'Salvar Despesa'}</button><button id="cancelarDesp" class="secondary" style="display:${editDespesaId?'inline-block':'none'}">Cancelar</button></div></div><div class="card-panel"><h3>Controle de Despesas</h3><div class="filter-bar"><div class="filter-field"><label>Mês</label><select id="fDespMes">${optMes('',true)}</select></div><div class="filter-field"><label>Ano</label><select id="fDespAno">${optAno()}</select></div><div class="filter-field"><label>Status</label><select id="fDespStatus"><option value="">Todas</option><option>Pago</option><option>A Vencer</option><option>Vencido</option><option>Cancelada</option></select></div><div class="filter-field"><label>Categoria</label><select id="fDespCategoria"><option value="">Todas categorias</option><option>Administrativo</option><option>Operacional</option><option>Pessoal</option><option>Impostos e Taxas</option><option>Manutenção</option><option>Outros</option></select></div><button id="btnDespFiltro" class="info">Filtrar</button><label class="switch-line"><input type="checkbox" id="fDespMostrarCanceladas"> Mostrar canceladas</label></div><div id="listaDespesas"></div></div>`;
+    dynamicView().innerHTML=html;
+    salvarDespesa.onclick=salvarDespesaFn;
+    cancelarDesp.onclick=()=>{editDespesaId=null;renderDespesas()};
+    btnDespFiltro.onclick=listarDespesas;
+    fDespMostrarCanceladas.onchange=listarDespesas;
+    despRecorrencia.onchange=()=>{campoParcelasDesp.style.display=despRecorrencia.value==='Mensal'?'flex':'none'; if(despRecorrencia.value==='Mensal')despPag.value='';};
+    if(editDespesaId)popularFormDespesa(editDespesaId);
+    configurarSugestaoCategoriaDespesa();
+    despRecorrencia.onchange();
+    listarDespesas();
 }
 function listarDespesas(){
     let mes=fDespMes.value,ano=fDespAno.value,st=fDespStatus.value,cat=fDespCategoria.value;
-    let mostrarCanceladas=document.getElementById('fDespMostrarCanceladas')?.checked||st==='Cancelada';let lista=db.despesas.filter(d=>{let status=calcularStatusDespesa(d);let dataBase=d.situacao==='Pago'&&d.dataPagamento?d.dataPagamento:(d.dataVencimento||d.dataLancamento||d.data);return mesmoMesAno(dataBase,mes,ano)&&(!st||status===st)&&(!cat||d.categoriaDesp===cat)&&(mostrarCanceladas||despesaEstaAtiva(d))});
-    let ativas=lista.filter(despesaEstaAtiva);let total=ativas.reduce((a,d)=>a+(Number(d.valor)||0),0);let pagas=ativas.filter(d=>calcularStatusDespesa(d)==='Pago').reduce((a,d)=>a+(Number(d.valor)||0),0);let vencidas=ativas.filter(d=>calcularStatusDespesa(d)==='Vencido').length;
-    listaDespesas.innerHTML=`<div class="dashboard-cards"><div class="card"><div>Total ativo</div><div class="card-value">${moeda(total)}</div></div><div class="card"><div>Pagas</div><div class="card-value">${moeda(pagas)}</div></div><div class="card"><div>Vencidas</div><div class="card-value">${vencidas}</div></div></div><div class="table-wrap"><table><tr><th>Vencimento</th><th>Pagamento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th><th>Forma</th><th>Status</th><th>Ações</th></tr>${lista.map(d=>{let cancelado=registroCancelado(d)||d.excluida;return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(d.dataVencimento)}</td><td>${formatarDataBR(d.dataPagamento)||'-'}</td><td>${escapeHtml(d.tipo||'')}${detalhesCancelamento(d)}</td><td>${escapeHtml(d.fornecedor||'')}</td><td>${escapeHtml(d.categoriaDesp||'')}</td><td>${cancelado?'<span class="valor-excluido">'+moeda(d.valor)+'</span>':moeda(d.valor)}</td><td>${escapeHtml(d.pagamento||'')}</td><td>${badgeStatusDespesa(calcularStatusDespesa(d))}</td><td>${cancelado?'<span class="muted">Registro mantido para auditoria</span>':`<div class="quick-actions">${d.dataPagamento?`<button class="mini-btn warning" onclick="reabrirDespesa(${d.id})">↩️ Reabrir</button>`:`<button class="mini-btn warning" onclick="pagarDespesa(${d.id})">💳 Pagar</button>`}<button class="mini-btn info" onclick="editarDespesa(${d.id})">✏️ Editar</button><button class="mini-btn danger" onclick="excluirDespesa(${d.id})">🚫 Cancelar</button></div>`}</td></tr>`}).join('')||'<tr><td colspan="9">Sem despesas.</td></tr>'}</table></div>`;
+    let mostrarCanceladas=document.getElementById('fDespMostrarCanceladas')?.checked||st==='Cancelada';
+    let lista=db.despesas.filter(d=>{
+        let status=calcularStatusDespesa(d);
+        let dataBase=d.situacao==='Pago'&&d.dataPagamento?d.dataPagamento:(d.dataVencimento||d.dataLancamento||d.data);
+        return mesmoMesAno(dataBase,mes,ano)&&(!st||status===st)&&(!cat||d.categoriaDesp===cat)&&(mostrarCanceladas||despesaEstaAtiva(d));
+    }).sort((a,b)=>compararDataDesc(a.dataVencimento||a.dataPagamento||a.data,b.dataVencimento||b.dataPagamento||b.data)||compararIdDesc(a,b));
+    let ativas=lista.filter(despesaEstaAtiva);
+    let total=ativas.reduce((a,d)=>a+(Number(d.valor)||0),0);
+    let pagas=ativas.filter(d=>calcularStatusDespesa(d)==='Pago').reduce((a,d)=>a+(Number(d.valor)||0),0);
+    let vencidas=ativas.filter(d=>calcularStatusDespesa(d)==='Vencido').length;
+    listaDespesas.innerHTML=`<div class="dashboard-cards"><div class="card"><div>Total ativo</div><div class="card-value">${moeda(total)}</div></div><div class="card"><div>Pagas</div><div class="card-value">${moeda(pagas)}</div></div><div class="card"><div>Vencidas</div><div class="card-value">${vencidas}</div></div></div><div class="table-wrap"><table><tr><th>Vencimento</th><th>Pagamento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th><th>Forma</th><th>Recorrência</th><th>Parcela</th><th>Status</th><th>Ações</th></tr>${lista.map(d=>{let cancelado=registroCancelado(d)||d.excluida;return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(d.dataVencimento)}</td><td>${formatarDataBR(d.dataPagamento)||'-'}</td><td>${escapeHtml(d.tipo||'')}${detalhesCancelamento(d)}</td><td>${escapeHtml(d.fornecedor||'')}</td><td>${escapeHtml(d.categoriaDesp||'')}</td><td>${cancelado?'<span class="valor-excluido">'+moeda(d.valor)+'</span>':moeda(d.valor)}</td><td>${escapeHtml(d.pagamento||'')}</td><td>${descricaoRecorrenciaDespesa(d)}</td><td>${descricaoParcelaDespesa(d)}</td><td>${badgeStatusDespesa(calcularStatusDespesa(d))}</td><td>${cancelado?'<span class="muted">Registro mantido para auditoria</span>':`<div class="quick-actions">${d.dataPagamento?`<button class="mini-btn warning" onclick="reabrirDespesa(${d.id})">↩️ Reabrir</button>`:`<button class="mini-btn warning" onclick="pagarDespesa(${d.id})">💳 Pagar</button>`}<button class="mini-btn info" onclick="editarDespesa(${d.id})">✏️ Editar</button><button class="mini-btn danger" onclick="excluirDespesa(${d.id})">🚫 Cancelar</button></div>`}</td></tr>`}).join('')||'<tr><td colspan="11">Sem despesas.</td></tr>'}</table></div>`;
 }
 function materialAtivo(m){return registroAtivo(m)}
 function optMateriais(sel="",todos=true,termo="",tipoFiltro=""){let q=String(termo||"").toLowerCase();let lista=db.materiais.filter(m=>(materialAtivo(m)||m.nome===sel)&&(!q||m.nome.toLowerCase().includes(q)||m.categoria.toLowerCase().includes(q))&&(!tipoFiltro||m.tipoPadrao===tipoFiltro));return [`${todos?'<option value="">Todos</option>':''}`,...lista.map(m=>`<option value="${escapeHtml(m.nome)}" ${sel===m.nome?'selected':''}>${escapeHtml(m.nome)}</option>`)].join('')}
@@ -2021,7 +2136,7 @@ function renderSaude(){
 }
 function listarOcorrenciasSaude(){
     let mes=saudeMes.value,ano=saudeAno.value,mostrarCanceladas=document.getElementById('fSaudeMostrarCanceladas')?.checked||false;
-    let lista=(db.ocorrenciasSaude||[]).filter(o=>mesmoMesAno(o.data,mes,ano)&&(mostrarCanceladas||registroAtivo(o)));
+    let lista=(db.ocorrenciasSaude||[]).filter(o=>mesmoMesAno(o.data,mes,ano)&&(mostrarCanceladas||registroAtivo(o))).sort((a,b)=>compararDataDesc(a.data,b.data)||compararIdDesc(a,b));
     let listaAtiva=lista.filter(registroAtivo);
     let ocorrencias=listaAtiva.length;
     let cooperadosAfastados=new Set((db.ocorrenciasSaude||[]).filter(o=>temAfastamentoAtivo(o)).map(o=>String(o.cooperadoId))).size;
@@ -2056,7 +2171,7 @@ function salvarCooperativaV265A7(){
     db.cooperativa = {nome, cnpj, municipio, uf, telefone, email, presidente};
     window.__editCooperativaAtivo = false;
     salvarDB();
-    alert('Dados da cooperativa salvos.');
+    if(typeof mostrarToast==='function')mostrarToast('Dados da cooperativa salvos com sucesso.','sucesso');
     renderCadastros();
 }
 function renderCadastros(){
@@ -2297,16 +2412,26 @@ function calcularPreco(){
         let anoV=vendasAtivasBase.filter(v=>v.material===m.nome&&getDate(v.data)?.getFullYear()===Number(ano));
         let qtd=periodoV.reduce((a,v)=>a+Number(v.quantidade||0),0),fat=periodoV.reduce((a,v)=>a+Number(v.total||0),0),qtdA=anoV.reduce((a,v)=>a+Number(v.quantidade||0),0),fatA=anoV.reduce((a,v)=>a+Number(v.total||0),0);
         let preco=qtd?fat/qtd:0,precoAno=qtdA?fatA/qtdA:0;
-        let sit=preco>precoAno?'Ganho':preco<precoAno?'Perda':'Neutro';
-        if(!qtd && !qtdA) sit='Neutro';
-        return {mat:m.nome,categoria:m.categoria,tipo:m.tipoPadrao||'',qtd,fat,preco,precoAno,sit}
+        let variacao=precoAno?((preco-precoAno)/precoAno)*100:0;
+        let sit='Neutro';
+        if(mes && qtd>0 && precoAno>0){
+            if(variacao>3) sit='Ganho';
+            else if(variacao<-3) sit='Perda';
+        }
+        return {mat:m.nome,categoria:m.categoria,tipo:m.tipoPadrao||'',qtd,fat,preco,precoAno,variacao,sit}
     }).filter(r=>(!matFiltro||r.mat===matFiltro)&&(!cat||r.categoria===cat)&&(!sitFiltro||r.sit===sitFiltro)&&(!ocultarZero||r.qtd>0));
     let volume=rows.reduce((a,r)=>a+r.qtd,0),faturamento=rows.reduce((a,r)=>a+r.fat,0),precoGeral=volume?faturamento/volume:0;
     let maiorFat=[...rows].sort((a,b)=>b.fat-a.fat)[0],maiorPreco=[...rows].filter(r=>r.qtd>0).sort((a,b)=>b.preco-a.preco)[0],perdas=rows.filter(r=>r.sit==='Perda').length,ganhos=rows.filter(r=>r.sit==='Ganho').length;
     precoResumo.innerHTML=`<div class="notice"><strong>Período analisado:</strong> ${escapeHtml(rotuloPeriodo)}. Base: somente vendas ativas.</div><div class="dashboard-cards"><div class="card"><div>Volume vendido</div><div class="card-value">${num(volume)} kg</div><small>somente vendas ativas</small></div><div class="card"><div>Faturamento</div><div class="card-value">${moeda(faturamento)}</div><small>somente vendas ativas</small></div><div class="card"><div>Preço médio geral</div><div class="card-value">${moeda(precoGeral)}/kg</div></div><div class="card"><div>Maior faturamento</div><div class="card-value" style="font-size:1.1rem">${maiorFat?escapeHtml(maiorFat.mat):'-'}</div><small>${maiorFat?moeda(maiorFat.fat):''}</small></div><div class="card"><div>Maior preço médio</div><div class="card-value" style="font-size:1.1rem">${maiorPreco?escapeHtml(maiorPreco.mat):'-'}</div><small>${maiorPreco?moeda(maiorPreco.preco)+'/kg':''}</small></div><div class="card"><div>Ganhos / perdas</div><div class="card-value">${ganhos} / ${perdas}</div></div></div>`;
     if(!rows.length){precoTable.innerHTML='<div class="empty">Sem vendas ativas para os filtros selecionados.</div>';return;}
-    let cards=rows.sort((a,b)=>b.fat-a.fat).map(r=>{let cls=r.sit==='Ganho'?'chip-ganho':r.sit==='Perda'?'chip-perda':'chip-neutro';return `<div class="price-card"><div class="price-card-head"><div><h4>${escapeHtml(r.mat)}</h4><small>${escapeHtml(r.categoria)} • ${escapeHtml(r.tipo)}</small></div><span class="price-chip ${cls}">${r.sit}</span></div><div class="price-metrics"><div class="metric-box"><div class="metric-label">Volume período</div><div class="metric-value">${num(r.qtd)} kg</div></div><div class="metric-box"><div class="metric-label">Faturamento</div><div class="metric-value">${moeda(r.fat)}</div></div><div class="metric-box"><div class="metric-label">Preço período</div><div class="metric-value price-highlight">${moeda(r.preco)}/kg</div></div><div class="metric-box"><div class="metric-label">Média anual</div><div class="metric-value">${moeda(r.precoAno)}/kg</div></div></div></div>`}).join('');
-    let tabela=`<details style="margin-top:1rem"><summary style="cursor:pointer;font-weight:800;color:#1f4e79;margin-bottom:.75rem">Ver tabela detalhada</summary><div class="table-wrap"><table class="compact-table"><tr><th>Material</th><th>Categoria</th><th>Volume</th><th>Faturamento</th><th>Preço período</th><th>Preço anual</th><th>Situação</th></tr>${rows.map(r=>{let cls=r.sit==='Ganho'?'status-good':r.sit==='Perda'?'status-danger':'status-warning';return `<tr><td>${escapeHtml(r.mat)}</td><td>${escapeHtml(r.categoria)}</td><td>${num(r.qtd)} kg</td><td>${moeda(r.fat)}</td><td>${moeda(r.preco)}</td><td>${moeda(r.precoAno)}</td><td class="${cls}">${r.sit}</td></tr>`}).join('')}</table></div></details>`;
+    let cards=rows.sort((a,b)=>b.fat-a.fat).map(r=>{
+        let cls=r.sit==='Ganho'?'chip-ganho':r.sit==='Perda'?'chip-perda':'chip-neutro';
+        let selo=r.sit==='Ganho'?'📈 GANHO':r.sit==='Perda'?'📉 PERDA':'➖ NEUTRO';
+        let tituloPreco=mes?`Preço de ${mesNome(Number(mes))}`:'Preço médio anual';
+        let comparativo=mes?`<div class="metric-box"><div class="metric-label">Média anual</div><div class="metric-value">${moeda(r.precoAno)}/kg</div></div>`:'';
+        return `<div class="price-card"><div class="price-card-head"><div><h4>${escapeHtml(r.mat)}</h4><small>${escapeHtml(r.categoria)} • ${escapeHtml(r.tipo)}</small></div><span class="price-chip ${cls}">${selo}</span></div><div class="price-metrics"><div class="metric-box"><div class="metric-label">Volume período</div><div class="metric-value">${num(r.qtd)} kg</div></div><div class="metric-box"><div class="metric-label">Faturamento</div><div class="metric-value">${moeda(r.fat)}</div></div><div class="metric-box ${mes?'':'metric-wide'}"><div class="metric-label">${tituloPreco}</div><div class="metric-value price-highlight">${moeda(r.preco)}/kg</div></div>${comparativo}</div></div>`
+    }).join('');
+    let tabela=`<details style="margin-top:1rem"><summary style="cursor:pointer;font-weight:800;color:#1f4e79;margin-bottom:.75rem">Ver tabela detalhada</summary><div class="table-wrap"><table class="compact-table"><tr><th>Material</th><th>Categoria</th><th>Volume</th><th>Faturamento</th><th>${mes?'Preço período':'Preço médio anual'}</th>${mes?'<th>Preço anual</th>':''}<th>Situação</th></tr>${rows.map(r=>{let cls=r.sit==='Ganho'?'status-good':r.sit==='Perda'?'status-danger':'status-warning';let seloTxt=r.sit==='Ganho'?'📈 GANHO':r.sit==='Perda'?'📉 PERDA':'➖ NEUTRO';return `<tr><td>${escapeHtml(r.mat)}</td><td>${escapeHtml(r.categoria)}</td><td>${num(r.qtd)} kg</td><td>${moeda(r.fat)}</td><td>${moeda(r.preco)}</td>${mes?`<td>${moeda(r.precoAno)}</td>`:''}<td class="${cls}">${seloTxt}</td></tr>`}).join('')}</table></div></details>`;
     precoTable.innerHTML=`<div class="price-grid">${cards}</div>${tabela}`;
 }
 
@@ -2361,7 +2486,7 @@ function salvarProducao(){
     let item={id:editProducaoId||Date.now(),data,material,categoria,unidade,tipo,quantidade,catadores,produtividade:catadores?quantidade/catadores:0,observacoes};
     aplicarAuditoriaSalvar(item,atual);
     if(editProducaoId){let i=db.producao.findIndex(p=>p.id===editProducaoId); if(i>=0)db.producao[i]=item; editProducaoId=null}else db.producao.push(item);
-    salvarDB(); renderProducao();
+    salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editProducaoId?'Produção atualizada com sucesso.':'Produção registrada com sucesso.','sucesso'); renderProducao();
 }
 
 function salvarVendaFn(){
@@ -2388,23 +2513,50 @@ function salvarVendaFn(){
     let item={id:editVendaId||Date.now(),data,material,categoria,tipo,unidade,quantidade:qtd,precoUnit,total:totalVenda,comprador:vendaComprador.value,observacoes:vendaObs.value};
     aplicarAuditoriaSalvar(item,atual);
     if(editVendaId){let i=db.vendas.findIndex(v=>v.id===editVendaId); if(i>=0)db.vendas[i]=item; editVendaId=null}else db.vendas.push(item);
-    salvarDB();renderVendas();
+    salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editVendaId?'Venda atualizada com sucesso.':'Venda registrada com sucesso.','sucesso');renderVendas();
 }
 
 function salvarDespesaFn(){
     let anterior=editDespesaId?db.despesas.find(d=>d.id===editDespesaId):null;
     if(anterior&&(anterior.excluida||registroCancelado(anterior)))return alert('Despesa cancelada não pode ser editada. Lance uma nova despesa se necessário.');
     const valor=valorNumericoPositivo(despValor.value,'Valor da despesa');
-    let item={...(anterior||{}),id:editDespesaId||Date.now(),dataVencimento:despVenc.value,dataPagamento:despPag.value,tipo:despTipo.value,categoriaDesp:despCategoria.value,valor,pagamento:despPagamento.value,fornecedor:despFornecedor.value,documento:despDoc.value,obs:despObs.value};
-    if(!item.dataVencimento||!item.tipo||valor===null)return alert('Preencha vencimento, descrição e valor.');
-    if(!confirmarDataFutura(item.dataVencimento,'O vencimento da despesa'))return;
-    if(item.dataPagamento && !confirmarDataFutura(item.dataPagamento,'O pagamento da despesa'))return;
+    let recorrencia=despRecorrencia?.value||'Unica';
+    let parcelas=recorrencia==='Mensal'?Math.max(2,Number(despParcelas?.value||2)):1;
+    if(!despVenc.value||!despTipo.value||valor===null)return alert('Preencha vencimento, descrição e valor.');
+    if(!confirmarDataFutura(despVenc.value,'O vencimento da despesa'))return;
+    if(recorrencia!=='Mensal' && despPag.value && !confirmarDataFutura(despPag.value,'O pagamento da despesa'))return;
     if(!confirmarValorForaPadrao(valor,50000,'O valor da despesa'))return;
+    if(recorrencia==='Mensal' && parcelas>60)return alert('Informe até 60 parcelas recorrentes.');
+    if(!editDespesaId && recorrencia==='Mensal' && parcelas>1){
+        if(!confirm(`Confirmar criação de ${parcelas} despesas recorrentes mensais?\n\nDescrição: ${despTipo.value}\nValor de cada parcela: ${moeda(valor)}\nPrimeiro vencimento: ${formatarDataBR(despVenc.value)}`))return;
+        const grupo=Date.now();
+        for(let idx=0; idx<parcelas; idx++){
+            let vencimento=adicionarMesesData(despVenc.value,idx);
+            let item={id:idUnicoSequencial(grupo,idx),dataVencimento:vencimento,dataPagamento:'',tipo:despTipo.value,categoriaDesp:despCategoria.value,valor,pagamento:despPagamento.value,fornecedor:despFornecedor.value,documento:despDoc.value,obs:despObs.value,recorrencia:'Mensal',parcelaAtual:idx+1,parcelaTotal:parcelas,recorrenciaGrupo:grupo,situacao:'Pendente',data:vencimento};
+            aplicarAuditoriaSalvar(item,null);
+            db.despesas.push(item);
+        }
+        editDespesaId=null;
+        salvarDB();
+        if(typeof mostrarToast==='function')mostrarToast(`${parcelas} despesas recorrentes geradas com sucesso.`,'sucesso');
+        renderDespesas();
+        return;
+    }
+    let item={...(anterior||{}),id:editDespesaId||Date.now(),dataVencimento:despVenc.value,dataPagamento:recorrencia==='Mensal'?'':despPag.value,tipo:despTipo.value,categoriaDesp:despCategoria.value,valor,pagamento:despPagamento.value,fornecedor:despFornecedor.value,documento:despDoc.value,obs:despObs.value,recorrencia:anterior?.recorrencia||'Unica',parcelaAtual:anterior?.parcelaAtual||'',parcelaTotal:anterior?.parcelaTotal||'',recorrenciaGrupo:anterior?.recorrenciaGrupo||''};
     item.situacao=item.dataPagamento?'Pago':'Pendente';
     item.data=item.dataPagamento||item.dataVencimento;
     aplicarAuditoriaSalvar(item,anterior);
-    if(editDespesaId){let i=db.despesas.findIndex(d=>d.id===editDespesaId); if(i>=0)db.despesas[i]=item; editDespesaId=null}else db.despesas.push(item);
-    salvarDB(); renderDespesas();
+    let estavaEditando=!!editDespesaId;
+    if(editDespesaId){
+        let i=db.despesas.findIndex(d=>d.id===editDespesaId);
+        if(i>=0)db.despesas[i]=item;
+        editDespesaId=null;
+    }else{
+        db.despesas.push(item);
+    }
+    salvarDB();
+    if(typeof mostrarToast==='function')mostrarToast(estavaEditando?'Despesa atualizada com sucesso.':'Despesa lançada com sucesso.','sucesso');
+    renderDespesas();
 }
 
 function salvarMaterial(){
@@ -2427,7 +2579,7 @@ function salvarMaterial(){
         }
         editMaterialNome=null;
     }else db.materiais.push(item);
-    salvarDB(); renderCadastros();
+    salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editMaterialNome?'Material atualizado com sucesso.':'Material salvo com sucesso.','sucesso'); renderCadastros();
 }
 
 function salvarCoopFn(){
@@ -2449,7 +2601,7 @@ function salvarCoopFn(){
     if(atual&&atual.foto&&!item.foto)item.foto=atual.foto;
     aplicarAuditoriaSalvar(item,atual);
     let fotoFile=coopFoto.files&&coopFoto.files[0];
-    let finalizar=()=>{if(editCoopId){let i=db.cooperados.findIndex(c=>c.id===editCoopId); if(i>=0)db.cooperados[i]=item; editCoopId=null}else db.cooperados.push(item); salvarDB(); renderCooperados();};
+    let finalizar=()=>{if(editCoopId){let i=db.cooperados.findIndex(c=>c.id===editCoopId); if(i>=0)db.cooperados[i]=item; editCoopId=null}else db.cooperados.push(item); salvarDB(); if(typeof mostrarToast==='function')mostrarToast(editCoopId?'Cooperado atualizado com sucesso.':'Cooperado salvo com sucesso.','sucesso'); renderCooperados();};
     if(fotoFile){let reader=new FileReader(); reader.onload=e=>{item.foto=e.target.result; finalizar()}; reader.readAsDataURL(fotoFile)}else finalizar();
 }
 
@@ -2469,7 +2621,7 @@ function salvarCooperativaV265A7(){
     db.cooperativa = {nome, cnpj, municipio, uf, telefone, email, presidente};
     window.__editCooperativaAtivo = false;
     salvarDB();
-    alert('Dados da cooperativa salvos.');
+    if(typeof mostrarToast==='function')mostrarToast('Dados da cooperativa salvos com sucesso.','sucesso');
     renderCadastros();
 }
 
@@ -2686,10 +2838,11 @@ function carregarFrequencia(){
     let faltas=contarFaltas(mes,ano),freq=freqMedia(mes,ano),motivos=contarAusenciasPorMotivo(mes,ano),diasPerdidos=diasPerdidosFrequencia(mes,ano);
     freqResumo.innerHTML=`<div class="dashboard-cards"><div class="card"><div>Cooperados ativos</div><div class="card-value">${coops.length}</div></div><div class="card"><div>Frequência média</div><div class="card-value">${num(freq,1)}%</div></div><div class="card"><div>Ausências no mês</div><div class="card-value">${faltas}</div></div><div class="card"><div>Dias perdidos</div><div class="card-value">${diasPerdidos}</div><small>Falta, atestado e licença</small></div><div class="card"><div>Atestados</div><div class="card-value">${motivos['Atestado']||0}</div></div><div class="card"><div>Férias</div><div class="card-value">${motivos['Férias']||0}</div></div></div>`;
     if(!coops.length){freqTabela.innerHTML='<div class="empty">Cadastre cooperados ativos para gerar a frequência.</div>';return}
-    let head=Array.from({length:dias},(_,i)=>`<th>${String(i+1).padStart(2,'0')}</th>`).join('');
+    let diasLista=Array.from({length:dias},(_,i)=>dias-i);
+    let head=diasLista.map(d=>`<th>${String(d).padStart(2,'0')}</th>`).join('');
     let rows=coops.map(c=>{
-        let tds=Array.from({length:dias},(_,i)=>{
-            let dia=String(i+1).padStart(2,'0'),data=`${ano}-${String(mes).padStart(2,'0')}-${dia}`,reg=getFreqRegistro(c.id,data),st=reg?.status||'N',cls=st==='P'?'presente':st==='A'?'ausente':'neutro';
+        let tds=diasLista.map(diaNum=>{
+            let dia=String(diaNum).padStart(2,'0'),data=`${ano}-${String(mes).padStart(2,'0')}-${dia}`,reg=getFreqRegistro(c.id,data),st=reg?.status||'N',cls=st==='P'?'presente':st==='A'?'ausente':'neutro';
             let motivo=reg?.motivoAusencia||'Falta';
             let motivoSelect=st==='A'?`<select class="freq-select ausente" style="width:92px;margin-top:.25rem" onchange="alterarMotivoFrequencia(${c.id},'${data}',this.value)">${MOTIVOS_AUSENCIA_V2654.map(m=>`<option value="${m}" ${motivo===m?'selected':''}>${m}</option>`).join('')}</select>`:'';
             let cancelar=reg?`<button class="mini-btn danger" style="padding:.18rem .35rem;margin-top:.25rem" title="Cancelar frequência" onclick="cancelarFrequencia(${reg.id})">🚫</button>`:'';
@@ -2763,6 +2916,119 @@ function carregarGestaoVista(){
         cardVista('💵','Retirada média',moeda(d.retirada),metaValor('retirada')?moeda(metaValor('retirada')):'Sem meta',statusMeta(d.retirada,metaValor('retirada')))
     ]);
     gvPainel.innerHTML=html;
+}
+
+
+
+/* ===== V26.5.9B - Usabilidade das Tabelas ===== */
+const LINHAS_POR_PAGINA_V2659A = 20;
+window.__paginasV2659A = window.__paginasV2659A || {};
+function paginaAtualV2659A(chave){return Math.max(1, Number(window.__paginasV2659A[chave]||1));}
+function definirPaginaV2659A(chave,pagina,renderFn){window.__paginasV2659A[chave]=Math.max(1,Number(pagina)||1); if(typeof renderFn==='function')renderFn();}
+function paginarV2659A(lista,chave){
+    const total=lista.length,totalPag=Math.max(1,Math.ceil(total/LINHAS_POR_PAGINA_V2659A));
+    let p=paginaAtualV2659A(chave); if(p>totalPag){p=totalPag; window.__paginasV2659A[chave]=p;}
+    const ini=(p-1)*LINHAS_POR_PAGINA_V2659A;
+    return {itens:lista.slice(ini,ini+LINHAS_POR_PAGINA_V2659A),pagina:p,totalPag,total,ini};
+}
+function htmlPaginacaoV2659A(chave,pag,renderFnName){
+    if(!pag || pag.total<=LINHAS_POR_PAGINA_V2659A)return '';
+    const fim=Math.min(pag.ini+LINHAS_POR_PAGINA_V2659A,pag.total);
+    return `<div class="pagination-bar"><div>Mostrando ${pag.ini+1}–${fim} de ${pag.total} registros</div><div class="pagination-actions"><button class="secondary" ${pag.pagina<=1?'disabled':''} onclick="definirPaginaV2659A('${chave}',${pag.pagina-1},${renderFnName})">◀ Anterior</button><span>Página ${pag.pagina} de ${pag.totalPag}</span><button class="secondary" ${pag.pagina>=pag.totalPag?'disabled':''} onclick="definirPaginaV2659A('${chave}',${pag.pagina+1},${renderFnName})">Próxima ▶</button></div></div>`;
+}
+function dataValorV2659A(data){let d=getDate(data); return d?d.getTime():0;}
+function compararDataDescV2659A(a,b){return dataValorV2659A(b)-dataValorV2659A(a);}
+function compararDataAscV2659A(a,b){return dataValorV2659A(a)-dataValorV2659A(b);}
+function statusOrdemDespesaV2659A(d){
+    if(registroCancelado(d)||d.excluida)return 9;
+    const st=calcularStatusDespesa(d);
+    if(st==='Vencido')return 0;
+    if(st==='A Vencer'||st==='Pendente')return 1;
+    if(st==='Pago')return 2;
+    return 3;
+}
+function compararDespesasOperacionalV2659A(a,b){
+    const oa=statusOrdemDespesaV2659A(a), ob=statusOrdemDespesaV2659A(b);
+    if(oa!==ob)return oa-ob;
+    const sta=calcularStatusDespesa(a), stb=calcularStatusDespesa(b);
+    if(sta==='Vencido' && stb==='Vencido')return compararDataAscV2659A(a.dataVencimento||a.data,b.dataVencimento||b.data);
+    if((sta==='A Vencer'||sta==='Pendente') && (stb==='A Vencer'||stb==='Pendente'))return compararDataAscV2659A(a.dataVencimento||a.data,b.dataVencimento||b.data);
+    if(sta==='Pago' && stb==='Pago')return compararDataDescV2659A(a.dataPagamento||a.dataVencimento||a.data,b.dataPagamento||b.dataVencimento||b.data);
+    return compararDataDescV2659A(a.dataVencimento||a.data,b.dataVencimento||b.data)||(Number(b.id)||0)-(Number(a.id)||0);
+}
+function textoAuditoriaV2659A(d){
+    const criado=d.criadoEm?new Date(d.criadoEm).toLocaleString('pt-BR'):'-';
+    const alterado=d.alteradoEm?new Date(d.alteradoEm).toLocaleString('pt-BR'):'-';
+    return `Criado em: ${criado}<br>Alterado em: ${alterado}${registroCancelado(d)?`<br>Cancelado por: ${escapeHtml(d.canceladoPor||'-')}<br>Motivo: ${escapeHtml(d.motivoCancelamento||'-')}`:''}`;
+}
+function abrirDetalhesDespesa(id){
+    const d=(db.despesas||[]).find(x=>String(x.id)===String(id)); if(!d)return;
+    const status=calcularStatusDespesa(d);
+    const html=`<div class="detalhes-modal-backdrop" onclick="if(event.target===this)this.remove()"><div class="detalhes-modal"><div class="detalhes-modal-header"><h3>📄 Detalhes da despesa</h3><button class="secondary mini-btn" onclick="this.closest('.detalhes-modal-backdrop').remove()">Fechar</button></div><div class="detalhes-modal-body"><div class="detalhes-grid">
+        <div class="detalhe-box"><div class="detalhe-label">Descrição</div><div class="detalhe-value">${escapeHtml(d.tipo||'-')}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Fornecedor</div><div class="detalhe-value">${escapeHtml(d.fornecedor||'-')}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Categoria</div><div class="detalhe-value">${escapeHtml(d.categoriaDesp||'-')}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Valor</div><div class="detalhe-value">${moeda(d.valor)}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Vencimento</div><div class="detalhe-value">${formatarDataBR(d.dataVencimento)||'-'}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Pagamento</div><div class="detalhe-value">${formatarDataBR(d.dataPagamento)||'-'}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Forma de pagamento</div><div class="detalhe-value">${escapeHtml(d.pagamento||'-')}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Documento</div><div class="detalhe-value">${escapeHtml(d.documento||'-')}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Recorrência</div><div class="detalhe-value">${descricaoRecorrenciaDespesa(d)}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Parcela</div><div class="detalhe-value">${descricaoParcelaDespesa(d)}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Status</div><div class="detalhe-value">${status}</div></div>
+        <div class="detalhe-box"><div class="detalhe-label">Auditoria</div><div class="detalhe-value">${textoAuditoriaV2659A(d)}</div></div>
+        <div class="detalhe-box" style="grid-column:1/-1"><div class="detalhe-label">Observações</div><div class="detalhe-value">${escapeHtml(d.obs||'-')}</div></div>
+    </div></div></div></div>`;
+    document.body.insertAdjacentHTML('beforeend',html);
+}
+function listarProducoes(){
+    inserirFiltroCancelados(document.querySelector('#listaProducao')?.closest('.card-panel'),'fProdMostrarCancelados','Mostrar canceladas',listarProducoes);
+    let mostrar=garantirFiltroCancelados('fProdMostrarCancelados',listarProducoes);
+    let lista=filtrarProducao().filter(p=>mostrar||registroAtivo(p)).sort((a,b)=>compararDataDescV2659A(a.data,b.data)||(Number(b.id)||0)-(Number(a.id)||0));
+    let listaIndicadores=lista.filter(registroAtivo);
+    let r=resumoProducao(listaIndicadores);
+    let pag=paginarV2659A(lista,'producao');
+    indicadoresProducao.innerHTML=`<div class="dashboard-cards"><div class="card"><div>Total válido</div><div class="card-value">${num(r.total)} kg</div></div><div class="card"><div>Processado</div><div class="card-value">${num(r.processado)} kg</div></div><div class="card"><div>Bruto</div><div class="card-value">${num(r.bruto)} kg</div></div><div class="card"><div>Rejeito</div><div class="card-value">${num(r.rejeito)} kg</div></div><div class="card"><div>Eficiência</div><div class="card-value">${num(r.eficiencia,1)}%</div></div><div class="card"><div>Maior categoria</div><div class="card-value">${r.topCat?escapeHtml(r.topCat[0]):'-'}</div><small>${r.topCat?num(r.topCat[1])+' kg':''}</small></div></div><div class="grid-2"><div class="card-panel"><h3>Produção por categoria</h3>${listaResumo(r.porCategoria)}</div><div class="card-panel"><h3>Produção por material</h3>${listaResumo(r.porMaterial,'kg',10)}</div></div>`;
+    listaProducao.innerHTML=`<div class="table-wrap"><table><tr><th>Data</th><th>Material</th><th>Categoria</th><th>Tipo</th><th>Qtd</th><th>Catadores</th><th>Produtividade</th><th>Status</th><th>Ações</th></tr>${pag.itens.map(p=>{let cancelado=registroCancelado(p);return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(p.data)}</td><td>${escapeHtml(p.material)}${detalhesCancelamento(p)}</td><td>${escapeHtml(p.categoria)}</td><td>${p.tipo}</td><td>${num(p.quantidade)} ${p.unidade||'kg'}</td><td>${p.catadores||'-'}</td><td>${num(p.produtividade,2)}</td><td>${cancelado?'<span class="status-chip chip-cancelado">CANCELADO</span>':'<span class="status-chip chip-pago">ATIVO</span>'}</td><td>${cancelado?'<span class="muted">Auditoria</span>':`<button class="mini-btn info" onclick="editarProducao(${p.id})">✏️ Editar</button> <button class="mini-btn danger" onclick="excluirProducao(${p.id})">🚫 Cancelar</button>`}</td></tr>`}).join('')||'<tr><td colspan="9">Sem lançamentos.</td></tr>'}</table></div>${htmlPaginacaoV2659A('producao',pag,'listarProducoes')}`;
+}
+function listarVendas(){
+    inserirFiltroCancelados(document.querySelector('#listaVendas')?.closest('.card-panel'),'fVendaMostrarCanceladas','Mostrar canceladas',listarVendas);
+    let mostrar=garantirFiltroCancelados('fVendaMostrarCanceladas',listarVendas);
+    let mes=fVendaMes.value,ano=fVendaAno.value,cat=fVendaCategoria.value,mat=fVendaMaterial.value;
+    let lista=db.vendas.filter(v=>{let matCad=db.materiais.find(m=>m.nome===v.material)||{};let categoria=v.categoria||matCad.categoria||'';return mesmoMesAno(v.data,mes,ano)&&(!cat||categoria===cat)&&(!mat||v.material===mat)&&(mostrar||registroAtivo(v))}).sort((a,b)=>compararDataDescV2659A(a.data,b.data)||(Number(b.id)||0)-(Number(a.id)||0));
+    let listaTotais=lista.filter(registroAtivo);
+    let qtdTotal=listaTotais.reduce((a,v)=>a+Number(v.quantidade||0),0);
+    let fatTotal=listaTotais.reduce((a,v)=>a+Number(v.total||0),0);
+    let precoMedio=fatTotal/(qtdTotal||1);
+    let compradores={};
+    listaTotais.forEach(v=>{let nome=(v.comprador||'Não informado').trim()||'Não informado'; compradores[nome]=(compradores[nome]||0)+Number(v.total||0);});
+    let maiorComprador=Object.entries(compradores).sort((a,b)=>b[1]-a[1])[0]||['-',0];
+    let painelVendas=`<div class="dashboard-cards"><div class="card"><div>💰 Faturamento</div><div class="card-value">${moeda(fatTotal)}</div><small>somente registros ativos</small></div><div class="card"><div>⚖️ Material vendido</div><div class="card-value">${num(qtdTotal)} kg</div><small>volume comercializado</small></div><div class="card"><div>📈 Preço médio</div><div class="card-value">${moeda(precoMedio)}/kg</div><small>faturamento ÷ quantidade</small></div><div class="card"><div>🏆 Maior comprador</div><div class="card-value" style="font-size:1.25rem">${escapeHtml(maiorComprador[0])}</div><small>${maiorComprador[1]?moeda(maiorComprador[1]):'sem vendas no período'}</small></div></div>`;
+    let pag=paginarV2659A(lista,'vendas');
+    listaVendas.innerHTML=`${painelVendas}<div class="table-wrap"><table><tr><th>Data</th><th>Material</th><th>Categoria</th><th>Tipo</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Comprador</th><th>Status</th><th>Ações</th></tr>${pag.itens.map(v=>{let matCad=db.materiais.find(m=>m.nome===v.material)||{};let cancelado=registroCancelado(v);return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(v.data)}</td><td>${escapeHtml(v.material)}${detalhesCancelamento(v)}</td><td>${escapeHtml(v.categoria||matCad.categoria||'')}</td><td>${escapeHtml(v.tipo||matCad.tipoPadrao||'Bruto')}</td><td>${num(v.quantidade)} ${escapeHtml(v.unidade||matCad.unidade||'kg')}</td><td>${moeda(v.precoUnit)}</td><td>${moeda(v.total)}</td><td>${escapeHtml(v.comprador||'')}</td><td>${cancelado?'<span class="status-chip chip-cancelado">CANCELADO</span>':'<span class="status-chip chip-pago">ATIVO</span>'}</td><td>${cancelado?'<span class="muted">Auditoria</span>':`<button class="mini-btn info" onclick="editarVenda(${v.id})">✏️ Editar</button> <button class="mini-btn danger" onclick="excluirVenda(${v.id})">🚫 Cancelar</button>`}</td></tr>`}).join('')||'<tr><td colspan="10">Sem vendas.</td></tr>'}</table></div>${htmlPaginacaoV2659A('vendas',pag,'listarVendas')}`;
+}
+function listarDespesas(){
+    let mes=fDespMes.value,ano=fDespAno.value,st=fDespStatus.value,cat=fDespCategoria.value;let mostrarCanceladas=document.getElementById('fDespMostrarCanceladas')?.checked||st==='Cancelada';
+    let lista=db.despesas.filter(d=>{let status=calcularStatusDespesa(d);let dataBase=d.situacao==='Pago'&&d.dataPagamento?d.dataPagamento:(d.dataVencimento||d.dataLancamento||d.data);return mesmoMesAno(dataBase,mes,ano)&&(!st||status===st)&&(!cat||d.categoriaDesp===cat)&&(mostrarCanceladas||despesaEstaAtiva(d))}).sort(compararDespesasOperacionalV2659A);
+    let ativas=lista.filter(d=>despesaEstaAtiva(d));
+    let total=ativas.reduce((a,d)=>a+(Number(d.valor)||0),0);
+    let pagas=ativas.filter(d=>calcularStatusDespesa(d)==='Pago').reduce((a,d)=>a+(Number(d.valor)||0),0);
+    let emAberto=ativas.filter(d=>calcularStatusDespesa(d)!=='Pago').reduce((a,d)=>a+(Number(d.valor)||0),0);
+    let vencidasValor=ativas.filter(d=>calcularStatusDespesa(d)==='Vencido').reduce((a,d)=>a+(Number(d.valor)||0),0);
+    let nomeMesDespesa=mes?mesNome(Number(mes)).replace(/^./,c=>c.toUpperCase()):'';
+    let tituloTotalDespesa=mes?`Total de ${nomeMesDespesa}`:'Total do Período';
+    let painelGerencial=`<div class="dashboard-cards"><div class="card"><div>${tituloTotalDespesa}</div><div class="card-value">${moeda(total)}</div></div><div class="card"><div>Pago</div><div class="card-value">${moeda(pagas)}</div></div><div class="card"><div>Em aberto</div><div class="card-value">${moeda(emAberto)}</div></div><div class="card"><div>Vencido</div><div class="card-value">${moeda(vencidasValor)}</div></div></div>${graficoPizzaDespesas(ativas,total)}`;
+    let pag=paginarV2659A(lista,'despesas');
+    listaDespesas.innerHTML=`${painelGerencial}<div class="notice"><strong>Ordem operacional:</strong> vencidas no topo, depois pendentes próximas, pagas recentes e futuras.</div><div class="table-wrap"><table class="tabela-despesas-operacional"><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Ações</th></tr>${pag.itens.map(d=>{let cancelado=registroCancelado(d)||d.excluida;return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(d.dataVencimento)}</td><td>${escapeHtml(d.tipo||'')}${detalhesCancelamento(d)}</td><td>${escapeHtml(d.fornecedor||'')}</td><td>${escapeHtml(d.categoriaDesp||'')}</td><td>${cancelado?'<span class="valor-excluido">'+moeda(d.valor)+'</span>':moeda(d.valor)}</td><td>${badgeStatusDespesa(calcularStatusDespesa(d))}</td><td>${cancelado?`<button class="mini-btn info" onclick="abrirDetalhesDespesa(${d.id})">📄 Detalhes</button>`:`<div class="quick-actions"><button class="mini-btn secondary" onclick="abrirDetalhesDespesa(${d.id})">📄 Detalhes</button>${d.dataPagamento?`<button class="mini-btn warning" onclick="reabrirDespesa(${d.id})">↩️ Reabrir</button>`:`<button class="mini-btn warning" onclick="pagarDespesa(${d.id})">💳 Pagar</button>`}<button class="mini-btn info" onclick="editarDespesa(${d.id})">✏️ Editar</button><button class="mini-btn danger" onclick="excluirDespesa(${d.id})">🚫 Cancelar</button></div>`}</td></tr>`}).join('')||'<tr><td colspan="7">Sem despesas.</td></tr>'}</table></div>${htmlPaginacaoV2659A('despesas',pag,'listarDespesas')}`;
+}
+function listarOcorrenciasSaude(){
+    inserirFiltroCancelados(document.querySelector('#saudeLista')?.closest('.card-panel')||pessoasConteudo,'fSaudeMostrarCanceladas','Mostrar canceladas',listarOcorrenciasSaude);
+    let mostrar=garantirFiltroCancelados('fSaudeMostrarCanceladas',listarOcorrenciasSaude);
+    let mes=saudeMes.value,ano=saudeAno.value,lista=db.ocorrenciasSaude.filter(o=>mesmoMesAno(o.data,mes,ano)&&(mostrar||registroAtivo(o))).sort((a,b)=>compararDataDescV2659A(a.data,b.data)||(Number(b.id)||0)-(Number(a.id)||0));
+    let listaAtiva=lista.filter(registroAtivo);
+    let ocorrencias=listaAtiva.length,cooperadosAfastados=new Set(db.ocorrenciasSaude.filter(o=>temAfastamentoAtivo(o)).map(o=>String(o.cooperadoId))).size,diasPerdidos=(db.ocorrenciasSaude||[]).reduce((a,o)=>a+diasPerdidosNoPeriodo(o,mes,ano),0),semAcidente=diasSemAcidente();
+    let pag=paginarV2659A(lista,'ocorrencias');
+    saudeLista.innerHTML=`<div class="dashboard-cards"><div class="card"><div>Ocorrências do mês</div><div class="card-value">${ocorrencias}</div><small>ativas</small></div><div class="card"><div>Cooperados afastados</div><div class="card-value">${cooperadosAfastados}</div><small>situação atual</small></div><div class="card"><div>Dias perdidos</div><div class="card-value">${diasPerdidos}</div><small>somatório do período</small></div><div class="card"><div>Dias sem acidente</div><div class="card-value">${semAcidente===null?'-':semAcidente}</div></div></div><div class="table-wrap"><table><tr><th>Data</th><th>Cooperado</th><th>Tipo</th><th>Afastamento</th><th>Status</th><th>Retorno</th><th>Dias perdidos</th><th>Obs.</th><th>Ações</th></tr>${pag.itens.map(o=>{let c=db.cooperados.find(x=>String(x.id)===String(o.cooperadoId));let st=statusOcorrencia(o),cancelado=registroCancelado(o);let acoes=cancelado?'<span class="muted">Auditoria</span>':(st==='Encerrada'?`<button class="mini-btn warning" onclick="reabrirOcorrenciaSaude(${o.id})">↩️ Reabrir</button>`:`<button class="mini-btn warning" onclick="encerrarOcorrenciaSaude(${o.id})">✅ Encerrar</button>`)+`<button class="mini-btn danger" onclick="excluirOcorrenciaSaude(${o.id})">🚫 Cancelar</button>`;return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(o.data)}</td><td>${escapeHtml(c?.nome||'')}${detalhesCancelamento(o)}</td><td>${escapeHtml(o.tipo)}</td><td>${escapeHtml(o.afastamento)}</td><td>${chipStatusOcorrencia(st)}</td><td>${st==='Encerrada'&&o.dataRetorno?formatarDataBR(o.dataRetorno):'-'}</td><td>${diasAfastamentoOcorrencia(o)}</td><td>${escapeHtml(o.obs||'')}</td><td><div class="quick-actions">${cancelado?'':`<button class="mini-btn info" onclick="editarOcorrenciaSaude(${o.id})">✏️ Editar</button>`}${acoes}</div></td></tr>`}).join('')||'<tr><td colspan="9">Sem ocorrências no período.</td></tr>'}</table></div>${htmlPaginacaoV2659A('ocorrencias',pag,'listarOcorrenciasSaude')}`;
 }
 
 </script>
