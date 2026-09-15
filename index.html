@@ -1841,7 +1841,7 @@ function carregarRemuneracao(){
     if(!modelo){remConteudo.innerHTML='<div class="empty">Defina o modelo de remuneração no cadastro da cooperativa.</div>';return}
     if(fechada&&fechada.status==='Fechado'){
         let desp=despesaDaRemuneracao(fechada.id);
-        remConteudo.innerHTML=`<div class="notice" style="border-left-color:#008037"><strong>Competência fechada:</strong> ${escapeHtml(mesNome(mes))}/${ano}. Total da folha: <strong>${moeda(fechada.total)}</strong>. ${desp?'A despesa correspondente já está registrada no Financeiro.':'Atenção: despesa vinculada não localizada.'}</div><div class="dashboard-cards"><div class="card"><div>Total da folha</div><div class="card-value">${moeda(fechada.total)}</div></div><div class="card"><div>Cooperados remunerados</div><div class="card-value">${fechada.itens?.length||0}</div></div><div class="card"><div>Data do pagamento</div><div class="card-value" style="font-size:1.15rem">${formatarDataBR(fechada.dataPagamento)}</div></div></div><div class="table-wrap"><table class="remun-table"><tr><th>Cooperado</th><th>Presenças</th><th>Faltas descontáveis</th><th>Justificadas</th><th>Valor de referência</th><th>Desconto</th><th>Valor pago</th><th>Ações</th></tr>${(fechada.itens||[]).map(i=>`<tr><td><strong>${escapeHtml(i.nome)}</strong></td><td>${i.presencas??'-'}</td><td>${i.faltas??'-'}</td><td>${i.justificadas??'-'}</td><td>${moeda(i.valorProjetado??i.valor)}</td><td>${moeda(i.desconto||0)}</td><td><strong>${moeda(i.valor)}</strong></td><td><div class="remun-acoes"><button class="info" onclick="abrirDemonstrativoRemuneracao(${mes},${ano},'${String(i.cooperadoId).replace(/'/g,"\\'")}')">🧾 Demonstrativo</button></div></td></tr>`).join('')}</table></div><div class="btn-row" style="margin-top:1rem"><button class="secondary" onclick="reabrirRemuneracao(${mes},${ano})">↩️ Reabrir competência para correção</button></div>`;
+        remConteudo.innerHTML=`<div class="notice" style="border-left-color:#008037"><strong>Competência fechada:</strong> ${escapeHtml(mesNome(mes))}/${ano}. Total da folha: <strong>${moeda(fechada.total)}</strong>. ${desp?'A despesa correspondente já está registrada no Financeiro.':'Atenção: despesa vinculada não localizada.'}</div><div class="dashboard-cards"><div class="card"><div>Total da folha</div><div class="card-value">${moeda(fechada.total)}</div></div><div class="card"><div>Cooperados remunerados</div><div class="card-value">${fechada.itens?.length||0}</div></div><div class="card"><div>Data do pagamento</div><div class="card-value" style="font-size:1.15rem">${formatarDataBR(fechada.dataPagamento)}</div></div></div><div class="table-wrap"><table class="remun-table"><tr><th>Cooperado</th><th>Presenças</th><th>Faltas descontáveis</th><th>Justificadas</th><th>Valor de referência</th><th>Desconto</th><th>Valor pago</th><th>Ações</th></tr>${(fechada.itens||[]).map(i=>{let cadastro=obterCooperadoPorIdRemuneracao(i.cooperadoId);let nomeAtual=cadastro.nome||i.nome||'Cooperado não identificado';return `<tr><td><strong>${escapeHtml(nomeAtual)}</strong></td><td>${i.presencas??'-'}</td><td>${i.faltas??'-'}</td><td>${i.justificadas??'-'}</td><td>${moeda(i.valorProjetado??i.valor)}</td><td>${moeda(i.desconto||0)}</td><td><strong>${moeda(i.valor)}</strong></td><td><div class="remun-acoes"><button class="info" onclick="abrirDemonstrativoRemuneracao(${mes},${ano},'${String(i.cooperadoId).replace(/'/g,"\\'")}')">🧾 Demonstrativo</button></div></td></tr>`}).join('')}</table></div><div class="btn-row" style="margin-top:1rem"><button class="secondary" onclick="reabrirRemuneracao(${mes},${ano})">↩️ Reabrir competência para correção</button></div>`;
         return;
     }
     let coops=cooperadosAtivosLista();
@@ -1929,6 +1929,7 @@ function abrirDemonstrativoRemuneracao(mes,ano,cooperadoId){
     if(!item)return alert('Cooperado não localizado nesta folha.');
 
     let coop=obterCooperadoPorIdRemuneracao(cooperadoId);
+    let nomeCooperadoAtual=coop.nome||item.nome||'Cooperado';
     let c=db.cooperativa||{};
     let competencia=mesNome(mes)+'/'+ano;
     let modelo=rotuloModeloRemuneracao(reg.modelo||c.modeloRemuneracao||'');
@@ -1941,7 +1942,7 @@ function abrirDemonstrativoRemuneracao(mes,ano,cooperadoId){
     let obs=(item.observacoes||coop.observacoes||'').trim();
     let logoSigres=document.querySelector('.acesso-marca img')?.src||document.querySelector('.sigres-logo')?.src||'';
 
-    let html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Demonstrativo - ${textoSeguroDemonstrativo(item.nome)}</title>
+    let html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Demonstrativo - ${textoSeguroDemonstrativo(nomeCooperadoAtual)}</title>
     <style>
     *{box-sizing:border-box}body{margin:0;padding:18px;background:#eef2f5;font-family:'Segoe UI',Arial,sans-serif;color:#263238}
     .acoes{max-width:900px;margin:0 auto 12px;display:flex;gap:8px;justify-content:flex-end}
@@ -1999,7 +2000,7 @@ function abrirDemonstrativoRemuneracao(mes,ano,cooperadoId){
       <section class="secao">
         <div class="secao-titulo">Dados do cooperado</div>
         <div class="dados">
-          <div class="campo"><span class="label">Nome</span><span class="valor">${textoSeguroDemonstrativo(item.nome||'-')}</span></div>
+          <div class="campo"><span class="label">Nome</span><span class="valor">${textoSeguroDemonstrativo(nomeCooperadoAtual)}</span></div>
           <div class="campo"><span class="label">CPF</span><span class="valor">${textoSeguroDemonstrativo(coop.cpf||'-')}</span></div>
           <div class="campo"><span class="label">Função</span><span class="valor">${textoSeguroDemonstrativo(coop.funcao||'-')}</span></div>
           <div class="campo"><span class="label">Modelo de retirada</span><span class="valor">${textoSeguroDemonstrativo(modelo||'-')}</span></div>
@@ -2032,7 +2033,7 @@ function abrirDemonstrativoRemuneracao(mes,ano,cooperadoId){
       <div class="obs"><strong>Observações:</strong> ${textoSeguroDemonstrativo(obs||'Sem observações registradas para esta remuneração.')}</div>
 
       <section class="assinaturas">
-        <div class="assinatura"><strong>${textoSeguroDemonstrativo(item.nome||'Cooperado')}</strong>Cooperado</div>
+        <div class="assinatura"><strong>${textoSeguroDemonstrativo(nomeCooperadoAtual)}</strong>Cooperado</div>
         <div class="assinatura"><strong>${textoSeguroDemonstrativo(c.presidente||'Responsável pela cooperativa')}</strong>Responsável pela cooperativa</div>
       </section>
 
