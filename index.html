@@ -576,7 +576,7 @@ button:focus,input:focus,select:focus,textarea:focus{outline:3px solid rgba(31,7
 .header-actions{display:flex;align-items:center;justify-content:flex-end;gap:.8rem;flex:0 0 auto;min-width:0}
 .coop-header-badge{background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(212,175,55,.72);border-left:4px solid #d4af37;padding:.48rem .82rem;border-radius:18px;font-weight:900;text-align:center;line-height:1.12;min-width:190px;max-width:270px;box-shadow:0 2px 8px rgba(0,0,0,.10);transition:.2s}
 .coop-header-badge.is-empty{display:none}
-.coop-badge-small{display:block;font-size:.66rem;letter-spacing:.09em;font-style:italic;font-weight:700;color:#d4cfb0;margin-bottom:.12rem}
+.coop-badge-small{display:block;font-size:.76rem;letter-spacing:.075em;font-style:italic;font-weight:800;color:#d4cfb0;margin-bottom:.12rem}
 .coop-badge-main{display:block;font-size:.82rem;letter-spacing:.015em;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
 .badge-version{padding:.5rem 1rem!important;min-width:222px!important;border-radius:19px!important}
 .badge-version .badge-small{font-size:.68rem!important}
@@ -5123,7 +5123,17 @@ function migrar(){let c=ler();if(!c)return null;if(c.versao>=2&&Array.isArray(c.
 function erro(msg){const e=document.getElementById("acessoErro");if(e){e.textContent=msg;e.classList.add("ativo")}}
 function caixaErro(){return '<div id="acessoErro" class="acesso-erro" role="alert"></div>'}
 function campoSenha(i,l){return '<div class="acesso-campo"><label for="'+i+'">'+l+'</label><input id="'+i+'" type="password" maxlength="80" required></div>'}
-function mostrar(html){conteudo.innerHTML=html;overlay.classList.add("ativo");document.body.classList.add("sigres-bloqueado");setTimeout(()=>conteudo.querySelector("input,select")?.focus(),40)}
+function instalarOlhosSenha(){
+ conteudo.querySelectorAll('input[type="password"]').forEach(input=>{
+  if(input.closest('.acesso-senha-wrap'))return;
+  const wrap=document.createElement('div');wrap.className='acesso-senha-wrap';
+  input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
+  const botao=document.createElement('button');botao.type='button';botao.className='acesso-senha-olho';botao.textContent='👁';botao.title='Mostrar senha ou PIN';botao.setAttribute('aria-label','Mostrar senha ou PIN');botao.setAttribute('aria-pressed','false');
+  botao.onclick=()=>{const mostrar=input.type==='password';input.type=mostrar?'text':'password';botao.textContent=mostrar?'🙈':'👁';botao.title=mostrar?'Ocultar senha ou PIN':'Mostrar senha ou PIN';botao.setAttribute('aria-label',botao.title);botao.setAttribute('aria-pressed',mostrar?'true':'false');input.focus();const fim=input.value.length;try{input.setSelectionRange(fim,fim)}catch(e){}};
+  wrap.appendChild(botao);
+ });
+}
+function mostrar(html){conteudo.innerHTML=html;instalarOlhosSenha();overlay.classList.add("ativo");document.body.classList.add("sigres-bloqueado");setTimeout(()=>conteudo.querySelector("input,select")?.focus(),40)}
 function telaAutorizacao(){mostrar('<h2 id="acessoTitulo">Autorização de uso do SIGRES</h2><p class="acesso-intro">Informe o código de autorização fornecido pelo Sebrae para liberar a configuração inicial.</p><div class="acesso-aviso"><strong>Acesso exclusivo.</strong><br>Este código é válido somente para liberar este acesso ao SIGRES. Após a autorização, será utilizado o login cadastrado pelo responsável administrativo.</div>'+caixaErro()+'<form id="formAutorizacao"><div class="acesso-campo"><label for="codigoAutorizacao">Código de autorização</label><input id="codigoAutorizacao" type="password" autocomplete="off" maxlength="40" placeholder="Código fornecido pelo Sebrae" required></div><button class="acesso-botao" type="submit">Validar e continuar</button></form>');document.getElementById("formAutorizacao").onsubmit=validarAutorizacao}
 async function validarAutorizacao(e){e.preventDefault();const informado=normAutorizacao(document.getElementById("codigoAutorizacao").value);if(await hashDireto(informado)!==HASH_CODIGO_TESTE)return erro("Código de autorização inválido. Confira os caracteres e tente novamente.");localStorage.setItem(CHAVE_AUTORIZACAO,"autorizado");mostrarToast("Uso do SIGRES autorizado com sucesso.","sucesso");if(migrar())telaLogin();else telaInicial()}
 function telaInicial(){mostrar('<h2 id="acessoTitulo">Configuração inicial</h2><p class="acesso-intro">Cadastre o responsável administrativo pelo SIGRES. Ele poderá criar operadores e recuperar acessos.</p><div class="acesso-coop">'+esc(nomeCoop())+'</div>'+caixaErro()+'<form id="formInicial"><div class="acesso-campo"><label for="admNome">Nome do responsável</label><input id="admNome" maxlength="80" required></div><div class="acesso-campo"><label for="admFuncao">Função</label><input id="admFuncao" maxlength="60" placeholder="Ex.: Presidente, tesoureiro" required></div>'+campoSenha("admSenha","Senha administrativa (mínimo de 6 caracteres)")+campoSenha("admConf","Confirmar senha")+'<button class="acesso-botao" type="submit">Criar acesso administrativo</button></form>');document.getElementById("formInicial").onsubmit=criarInicial}
@@ -5199,9 +5209,9 @@ function numeroComprovanteV160(id){return 'CMP-'+String(id).slice(-8)}
 function usuarioV160(){return window.sigresNomeUsuarioAtual?.()||'Usuário não identificado'}
 function renderComprasV160(){
  garantirComprasV160();
- dynamicView().innerHTML=`<div class="card-panel"><div class="section-title"><div><h2>🛒 Compras de Materiais</h2><p class="muted">Registre materiais adquiridos de catadores avulsos e outros fornecedores.</p></div></div><div class="compras-abas"><button data-aba="nova">➕ Nova compra</button><button data-aba="historico">📋 Histórico</button><button data-aba="recebidos">⚖️ Material recebido</button><button data-aba="fornecedores">👤 Catadores/Fornecedores</button></div><div id="conteudoComprasV160"></div></div>`;
+ dynamicView().innerHTML=`<div class="card-panel"><div class="section-title"><div><h2>🛒 Compras de Materiais</h2><p class="muted">Registre materiais adquiridos de catadores avulsos e outros fornecedores.</p></div></div><div class="compras-abas"><button data-aba="nova">➕ Nova compra</button><button data-aba="historico">📋 Histórico</button><button data-aba="relatorio">📊 Relatório individual</button><button data-aba="recebidos">⚖️ Material recebido</button><button data-aba="fornecedores">👤 Catadores/Fornecedores</button></div><div id="conteudoComprasV160"></div></div>`;
  document.querySelectorAll('.compras-abas button').forEach(b=>{b.classList.toggle('active',b.dataset.aba===abaComprasV160);b.onclick=()=>{abaComprasV160=b.dataset.aba;renderComprasV160()}});
- if(abaComprasV160==='nova')renderNovaCompraV160();else if(abaComprasV160==='historico')renderHistoricoComprasV160();else if(abaComprasV160==='recebidos')renderRecebidosV160();else renderFornecedoresV160();
+ if(abaComprasV160==='nova')renderNovaCompraV160();else if(abaComprasV160==='historico')renderHistoricoComprasV160();else if(abaComprasV160==='relatorio')renderRelatorioComprasV170();else if(abaComprasV160==='recebidos')renderRecebidosV160();else renderFornecedoresV160();
 }
 function renderNovaCompraV160(){
  if(!itensCompraV160.length)itensCompraV160=[{uid:Date.now(),material:'',pesoBruto:'',desconto:'',pesoLiquido:0,preco:''}];
@@ -5243,7 +5253,7 @@ function listarComprasV160(){
  const mes=document.getElementById('fCompraMesV160').value,ano=document.getElementById('fCompraAnoV160').value,q=document.getElementById('fCompraBuscaV160').value.toLowerCase(),mostrar=document.getElementById('fCompraCanceladasV160').checked;
  let lista=[...db.compras].filter(c=>mesmoMesAno(c.data,mes,ano)&&(mostrar||registroAtivo(c))&&(!q||[c.numero,nomeFornecedorCompraV162(c),...(c.itens||[]).map(i=>i.material)].join(' ').toLowerCase().includes(q))).sort((a,b)=>compararDataDesc(a.data,b.data)||compararIdDesc(a,b));
  const ativos=lista.filter(registroAtivo),total=ativos.reduce((a,c)=>a+numeroV160(c.total),0),peso=ativos.reduce((a,c)=>a+numeroV160(c.pesoLiquido),0);
- document.getElementById('listaComprasV160').innerHTML=`<div class="notice"><strong>${ativos.length}</strong> compras ativas &nbsp; | &nbsp; <strong>${num(peso)} kg</strong> recebidos &nbsp; | &nbsp; <strong>${moeda(total)}</strong> pagos/comprometidos</div><div class="table-wrap"><table><tr><th>Data</th><th>Comprovante</th><th>Catador/Fornecedor</th><th>Materiais</th><th>Peso líquido</th><th>Total</th><th>Pagamento</th><th>Status</th><th>Ações</th></tr>${lista.map(c=>{const cancelado=registroCancelado(c),mats=(c.itens||[]).map(i=>i.material).join(', ');return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(c.data)}</td><td><strong>${escV160(c.numero)}</strong></td><td>${escV160(nomeFornecedorCompraV162(c))}</td><td style="text-align:left">${escV160(mats)}</td><td>${num(c.pesoLiquido)} kg</td><td><strong>${moeda(c.total)}</strong></td><td>${escV160(c.formaPagamento)}</td><td>${cancelado?'<span class="status-chip chip-cancelado">CANCELADA</span>':'<span class="status-chip chip-pago">ATIVA</span>'}</td><td>${cancelado?'<span class="muted">Auditoria</span>':`<button class="mini-btn info" onclick="emitirComprovanteCompraV160(${c.id})">📄 Comprovante</button> <button class="mini-btn danger" onclick="cancelarCompraV160(${c.id})">🚫 Cancelar</button>`}</td></tr>`}).join('')||'<tr><td colspan="9">Nenhuma compra encontrada.</td></tr>'}</table></div>`;
+ document.getElementById('listaComprasV160').innerHTML=`<div class="notice"><strong>${ativos.length}</strong> compras ativas &nbsp; | &nbsp; <strong>${num(peso)} kg</strong> recebidos &nbsp; | &nbsp; <strong>${moeda(total)}</strong> pagos/comprometidos</div><div class="table-wrap"><table><tr><th>Data</th><th>Comprovante</th><th>Catador/Fornecedor</th><th>Materiais</th><th>Peso líquido</th><th>Total</th><th>Pagamento</th><th>Status</th><th>Ações</th></tr>${lista.map(c=>{const cancelado=registroCancelado(c),mats=(c.itens||[]).map(i=>i.material).join(', ');return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(c.data)}</td><td><strong>${escV160(c.numero)}</strong></td><td>${escV160(nomeFornecedorCompraV162(c))}</td><td style="text-align:left">${escV160(mats)}</td><td>${num(c.pesoLiquido)} kg</td><td><strong>${moeda(c.total)}</strong></td><td>${escV160(c.formaPagamento)}</td><td>${cancelado?'<span class="status-chip chip-cancelado">CANCELADA</span>':'<span class="status-chip chip-pago">ATIVA</span>'}</td><td>${cancelado?'<span class="muted">Auditoria</span>':`<button class="mini-btn info" onclick="emitirComprovanteCompraV160(${c.id})">📄 A4</button> <button class="mini-btn warning" onclick="emitirTicketCompraV170(${c.id})">🧾 Ticket</button> <button class="mini-btn danger" onclick="cancelarCompraV160(${c.id})">🚫 Cancelar</button>`}</td></tr>`}).join('')||'<tr><td colspan="9">Nenhuma compra encontrada.</td></tr>'}</table></div>`;
 }
 window.cancelarCompraV160=function(id){const c=db.compras.find(x=>String(x.id)===String(id));if(!c||registroCancelado(c))return;let motivo=prompt(`Compra ${c.numero} — ${nomeFornecedorCompraV162(c)}\n\nInforme o motivo do cancelamento:`);if(motivo===null)return;motivo=motivo.trim();if(!motivo)return alert('Informe o motivo.');if(!confirm('Cancelar a compra e a despesa automática vinculada? Os registros serão preservados para auditoria.'))return;prepararAuditoriaRegistro(c);c.statusRegistro='CANCELADO';c.canceladoEm=agoraISO();c.canceladoPor=usuarioV160();c.motivoCancelamento=motivo;const d=db.despesas.find(x=>String(x.id)===String(c.despesaId));if(d&&!registroCancelado(d)){prepararAuditoriaRegistro(d);d.statusRegistro='CANCELADO';d.canceladoEm=c.canceladoEm;d.canceladoPor=c.canceladoPor;d.motivoCancelamento='Cancelamento da compra '+c.numero+': '+motivo;d.excluida=true}salvarDB();mostrarToast('Compra e despesa vinculada canceladas.','sucesso');listarComprasV160()};
 function renderRecebidosV160(){
@@ -5257,7 +5267,563 @@ function listarFornecedoresV160(){const q=(document.getElementById('buscaFornece
 window.abrirCadastroFornecedorV160=function(rapido=false,id=null){const f=id?db.fornecedoresMateriais.find(x=>String(x.id)===String(id)):null,modal=document.createElement('div');modal.className='compra-modal';modal.innerHTML=`<div class="compra-modal-box"><div class="compra-modal-head"><div><h3>${f?'Editar':'Cadastrar'} catador/fornecedor</h3><p class="muted">Este cadastro não cria vínculo como cooperado.</p></div><button type="button" data-fechar>×</button></div><div class="form-grid"><div class="field"><label>Nome completo/Razão social *</label><input id="fornNomeV160" value="${escV160(f?.nome||'')}"></div><div class="field"><label>CPF/CNPJ</label><input id="fornDocV160" value="${escV160(f?.cpfCnpj||'')}"></div><div class="field"><label>Tipo *</label><select id="fornTipoV160"><option ${f?.tipo==='Catador avulso'?'selected':''}>Catador avulso</option><option ${f?.tipo==='Outro fornecedor'?'selected':''}>Outro fornecedor</option></select></div><div class="field"><label>Telefone</label><input id="fornTelV160" value="${escV160(f?.telefone||'')}"></div><div class="field"><label>Município</label><input id="fornMunicipioV160" value="${escV160(f?.municipio||'')}"></div><div class="field"><label>Bairro/Comunidade</label><input id="fornBairroV160" value="${escV160(f?.bairro||'')}"></div><div class="field"><label>Chave PIX</label><input id="fornPixV160" value="${escV160(f?.chavePix||'')}"></div></div><div class="btn-row"><button id="salvarFornecedorV160">💾 Salvar cadastro</button><button type="button" class="secondary" data-fechar>Cancelar</button></div></div>`;document.body.appendChild(modal);modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=()=>modal.remove());modal.onclick=e=>{if(e.target===modal)modal.remove()};document.getElementById('salvarFornecedorV160').onclick=()=>{const nome=fornNomeV160.value.trim(),doc=fornDocV160.value.trim();if(!nome)return alert('Informe o nome.');const duplicado=db.fornecedoresMateriais.find(x=>String(x.id)!==String(id)&&((doc&&x.cpfCnpj===doc)||x.nome.toLowerCase()===nome.toLowerCase()));if(duplicado)return alert('Já existe cadastro com este nome ou documento.');const item={...(f||{}),id:f?.id||Date.now(),nome,cpfCnpj:doc,tipo:fornTipoV160.value,telefone:fornTelV160.value.trim(),municipio:fornMunicipioV160.value.trim(),bairro:fornBairroV160.value.trim(),chavePix:fornPixV160.value.trim(),ativo:f?.ativo!==false};if(typeof aplicarAuditoriaSalvar==='function')aplicarAuditoriaSalvar(item,f||null);if(f){const ix=db.fornecedoresMateriais.findIndex(x=>String(x.id)===String(f.id));db.fornecedoresMateriais[ix]=item}else db.fornecedoresMateriais.push(item);salvarDB();modal.remove();mostrarToast('Catador/fornecedor salvo.','sucesso');if(rapido){const sel=document.getElementById('compraFornecedorV160');if(sel){sel.innerHTML=opcoesFornecedoresV160(item.id);sel.value=item.id}}else renderFornecedoresV160()}};
 window.alternarFornecedorV160=function(id){const f=db.fornecedoresMateriais.find(x=>String(x.id)===String(id));if(!f)return;const acao=fornecedorAtivoV160(f)?'inativar':'reativar';if(!confirm(`Confirmar ${acao} ${f.nome}?`))return;f.ativo=!fornecedorAtivoV160(f);f.alteradoEm=agoraISO();f.alteradoPor=usuarioV160();salvarDB();listarFornecedoresV160()};
 window.emitirComprovanteCompraV160=function(id){const c=db.compras.find(x=>String(x.id)===String(id));if(!c)return alert('Compra não localizada.');const coop=db.cooperativa||{},forn=db.fornecedoresMateriais.find(f=>String(f.id)===String(c.fornecedorId))||{},logo=document.querySelector('.sigres-logo')?.src||'',linhas=(c.itens||[]).map(i=>`<tr><td>${escV160(i.material)}</td><td>${num(i.pesoBruto)} kg</td><td>${num(i.desconto)} kg</td><td>${num(i.pesoLiquido)} kg</td><td>${moeda(i.precoUnit)}</td><td>${moeda(i.total)}</td></tr>`).join(''),html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Comprovante ${escV160(c.numero)}</title><style>*{box-sizing:border-box}body{margin:0;padding:18px;background:#eef2f5;font-family:Segoe UI,Arial;color:#263238}.acoes{max-width:900px;margin:0 auto 12px;text-align:right}.acoes button{border:0;border-radius:10px;padding:10px 14px;font-weight:800;background:#1f4e79;color:#fff;cursor:pointer}.doc{max-width:900px;margin:auto;background:#fff;border:1px solid #dfe7ee;border-radius:14px;overflow:hidden}.faixa{background:#1f4e79;color:#fff;border-bottom:6px solid #d4af37;padding:20px 28px;display:flex;justify-content:space-between;align-items:center}.faixa h1{margin:0;color:#fff;font-size:23px}.faixa p{margin:5px 0 0}.faixa img{width:75px;height:75px;object-fit:contain}.corpo{padding:28px}.topo{display:grid;grid-template-columns:1.3fr .7fr;gap:25px;border-bottom:1px solid #dfe7ee;padding-bottom:18px}.coop{font-size:18px;font-weight:900;color:#1f4e79}.meta{text-align:right;font-size:12px}.secao{margin-top:20px}.titulo{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:#1f4e79;margin-bottom:8px}.dados{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.campo{border:1px solid #e0e6eb;border-radius:10px;padding:9px}.campo small{display:block;color:#60717d;text-transform:uppercase;font-size:9px}.campo strong{font-size:12px}table{width:100%;border-collapse:collapse}th{background:#1f4e79;color:#fff;font-size:10px;padding:8px}td{border:1px solid #dfe7ee;padding:8px;text-align:center;font-size:11px}.total{margin-top:12px;text-align:right;font-size:19px;font-weight:900;color:#008037}.declaracao{margin-top:20px;border-left:5px solid #d4af37;background:#fff8e5;padding:13px;line-height:1.5;font-size:11px}.assinaturas{display:grid;grid-template-columns:1fr 1fr;gap:70px;margin-top:58px;text-align:center}.assinatura{border-top:1px solid #455a64;padding-top:6px;font-size:11px}.rodape{margin-top:28px;border-top:2px solid #d4af37;padding-top:10px;text-align:center;color:#60717d;font-size:9px}@page{size:A4;margin:10mm}@media print{body{padding:0;background:#fff}.acoes{display:none}.doc{border:0;border-radius:0}.faixa,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}.corpo{padding:8mm}}</style></head><body><div class="acoes"><button onclick="window.print()">🖨️ Imprimir / Salvar em PDF</button></div><main class="doc"><section class="faixa"><div><h1>Comprovante de Compra</h1><p>Materiais recicláveis • SIGRES</p></div>${logo?`<img src="${logo}">`:''}</section><div class="corpo"><section class="topo"><div><div class="coop">${escV160(coop.nome||coop.nomeFantasia||'Cooperativa')}</div><div>${coop.cnpj?'CNPJ: '+escV160(coop.cnpj)+'<br>':''}${escV160([coop.municipio,coop.uf].filter(Boolean).join(' / '))}</div></div><div class="meta"><strong>${escV160(c.numero)}</strong><br>Data: ${formatarDataBR(c.data)}<br>Emitido em: ${formatarDataBR(hojeV160())}</div></section><section class="secao"><div class="titulo">Catador/Fornecedor</div><div class="dados"><div class="campo"><small>Nome</small><strong>${escV160(c.fornecedorNome)}</strong></div><div class="campo"><small>CPF/CNPJ</small><strong>${escV160(c.fornecedorDocumento||'Não informado')}</strong></div><div class="campo"><small>Telefone</small><strong>${escV160(forn.telefone||'Não informado')}</strong></div><div class="campo"><small>Forma de pagamento</small><strong>${escV160(c.formaPagamento)}</strong></div><div class="campo"><small>Responsável pelo registro</small><strong>${escV160(c.responsavel)}</strong></div><div class="campo"><small>Localidade</small><strong>${escV160([forn.bairro,forn.municipio].filter(Boolean).join(' — ')||'Não informada')}</strong></div></div></section><section class="secao"><div class="titulo">Materiais entregues</div><table><tr><th>Material</th><th>Peso bruto</th><th>Desconto</th><th>Peso líquido</th><th>Preço/kg</th><th>Total</th></tr>${linhas}</table><div class="total">TOTAL: ${moeda(c.total)}</div></section><div class="declaracao"><strong>Declaração:</strong> declaro que entreguei à cooperativa os materiais relacionados neste comprovante e recebi, ou tenho a receber, o valor total de <strong>${moeda(c.total)}</strong>, conforme a forma de pagamento registrada. Este comprovante é destinado ao controle da operação e não substitui documento fiscal quando exigido pela legislação.</div><section class="assinaturas"><div class="assinatura"><strong>${escV160(c.fornecedorNome)}</strong><br>Catador/Fornecedor</div><div class="assinatura"><strong>${escV160(c.responsavel)}</strong><br>Responsável pela cooperativa</div></section><div class="rodape">SIGRES — Solução Integrada de Gestão de Resíduos Sólidos • ${escV160(c.numero)}</div></div></main></body></html>`;const w=window.open('','_blank','width=980,height=780');if(!w)return alert('Autorize pop-ups para emitir o comprovante.');w.document.open();w.document.write(html);w.document.close()};
+
+function opcoesFornecedoresRelatorioV170(sel=''){
+ return '<option value="">Todos os catadores/fornecedores</option>'+[...(db.fornecedoresMateriais||[])].sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''))).map(f=>`<option value="${escV160(f.id)}" ${String(sel)===String(f.id)?'selected':''}>${escV160(f.nome||'Sem nome')}</option>`).join('');
+}
+function materiaisCompradosV170(){
+ return [...new Set((db.compras||[]).flatMap(c=>(c.itens||[]).map(i=>i.material)).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+}
+function dadosRelatorioComprasV170(di,df,fornecedorId,material){
+ const compras=(db.compras||[]).filter(c=>registroAtivo(c)&&(!di||c.data>=di)&&(!df||c.data<=df)&&(!fornecedorId||String(c.fornecedorId)===String(fornecedorId))).sort((a,b)=>String(a.data).localeCompare(String(b.data))||Number(a.id)-Number(b.id));
+ const linhas=[];compras.forEach(c=>(c.itens||[]).forEach(i=>{if(material&&i.material!==material)return;const liquido=numeroV160(i.pesoLiquido),preco=numeroV160(i.precoUnit),total=numeroV160(i.total)||(liquido*preco);linhas.push({compra:c,material:i.material,pesoBruto:numeroV160(i.pesoBruto),desconto:numeroV160(i.desconto),pesoLiquido:liquido,preco,total})}));
+ const porMaterial={};linhas.forEach(l=>{if(!porMaterial[l.material])porMaterial[l.material]={peso:0,valor:0};porMaterial[l.material].peso+=l.pesoLiquido;porMaterial[l.material].valor+=l.total});
+ return {compras,linhas,porMaterial,peso:linhas.reduce((a,l)=>a+l.pesoLiquido,0),valor:linhas.reduce((a,l)=>a+l.total,0)};
+}
+function filtrosRelatorioComprasV170(){return {di:document.getElementById('relCompraInicioV170')?.value||'',df:document.getElementById('relCompraFimV170')?.value||'',fornecedorId:document.getElementById('relCompraFornecedorV170')?.value||'',material:document.getElementById('relCompraMaterialV170')?.value||''}}
+function renderRelatorioComprasV170(){
+ const host=document.getElementById('conteudoComprasV160'),hoje=hojeV160(),inicio=hoje.slice(0,8)+'01';
+ host.innerHTML=`<div class="notice"><strong>Relatório individual:</strong> acompanhe quanto cada catador ou fornecedor entregou e recebeu no período. Compras canceladas são preservadas para auditoria, mas não entram nos totais.</div><div class="filter-bar"><div class="filter-field"><label>Data inicial</label><input id="relCompraInicioV170" type="date" value="${inicio}"></div><div class="filter-field"><label>Data final</label><input id="relCompraFimV170" type="date" value="${hoje}"></div><div class="filter-field"><label>Catador/Fornecedor</label><select id="relCompraFornecedorV170">${opcoesFornecedoresRelatorioV170()}</select></div><div class="filter-field"><label>Material</label><select id="relCompraMaterialV170"><option value="">Todos os materiais</option>${materiaisCompradosV170().map(m=>`<option>${escV160(m)}</option>`).join('')}</select></div><button id="btnAtualizarRelCompraV170" class="info">Atualizar</button><button id="btnImprimirRelCompraV170" class="warning">📄 A4 / PDF</button><button id="btnTicketRelCompraV170" class="warning">🧾 Ticket</button></div><div id="resultadoRelCompraV170"></div>`;
+ ['relCompraInicioV170','relCompraFimV170','relCompraFornecedorV170','relCompraMaterialV170'].forEach(id=>document.getElementById(id).onchange=atualizarRelatorioComprasV170);document.getElementById('btnAtualizarRelCompraV170').onclick=atualizarRelatorioComprasV170;document.getElementById('btnImprimirRelCompraV170').onclick=window.imprimirRelatorioComprasV170;document.getElementById('btnTicketRelCompraV170').onclick=window.imprimirTicketRelatorioComprasV170;atualizarRelatorioComprasV170();
+}
+function atualizarRelatorioComprasV170(){
+ const f=filtrosRelatorioComprasV170();if(f.di&&f.df&&f.di>f.df){document.getElementById('resultadoRelCompraV170').innerHTML='<div class="notice" style="border-left-color:#b91c1c">A data inicial não pode ser posterior à data final.</div>';return}
+ const d=dadosRelatorioComprasV170(f.di,f.df,f.fornecedorId,f.material),forn=(db.fornecedoresMateriais||[]).find(x=>String(x.id)===String(f.fornecedorId)),comprasUnicas=new Set(d.linhas.map(l=>String(l.compra.id))).size;
+ const resumo=Object.entries(d.porMaterial).sort((a,b)=>b[1].peso-a[1].peso).map(([m,x])=>`<tr><td style="text-align:left">${escV160(m)}</td><td>${num(x.peso)} kg</td><td>${moeda(x.valor)}</td><td>${moeda(x.peso?x.valor/x.peso:0)}/kg</td></tr>`).join();
+ const detalhes=d.linhas.map(l=>`<tr><td>${formatarDataBR(l.compra.data)}</td><td>${escV160(l.compra.numero)}</td><td style="text-align:left">${escV160(nomeFornecedorCompraV162(l.compra))}</td><td style="text-align:left">${escV160(l.material)}</td><td>${num(l.pesoBruto)} kg</td><td>${num(l.desconto)} kg</td><td>${num(l.pesoLiquido)} kg</td><td>${moeda(l.preco)}</td><td><strong>${moeda(l.total)}</strong></td></tr>`).join();
+ document.getElementById('resultadoRelCompraV170').innerHTML=`<div class="rel-compra-identificacao"><strong>${escV160(forn?.nome||'Todos os catadores/fornecedores')}</strong>${forn?.cpfCnpj?`<span>${escV160(forn.cpfCnpj)}</span>`:''}<span>Período: ${f.di?formatarDataBR(f.di):'início'} a ${f.df?formatarDataBR(f.df):'hoje'}</span></div><div class="dashboard-cards"><div class="card"><div>Compras</div><div class="card-value">${comprasUnicas}</div></div><div class="card"><div>Peso líquido</div><div class="card-value">${num(d.peso)} kg</div></div><div class="card"><div>Valor total</div><div class="card-value">${moeda(d.valor)}</div></div><div class="card"><div>Preço médio</div><div class="card-value">${moeda(d.peso?d.valor/d.peso:0)}/kg</div></div></div><div class="card-panel"><h3>Resumo por material</h3><div class="table-wrap"><table><tr><th>Material</th><th>Peso líquido</th><th>Valor</th><th>Preço médio</th></tr>${resumo||'<tr><td colspan="4">Nenhuma compra ativa encontrada.</td></tr>'}</table></div></div><div class="card-panel"><h3>Detalhamento das compras</h3><div class="table-wrap"><table><tr><th>Data</th><th>Comprovante</th><th>Catador/Fornecedor</th><th>Material</th><th>Bruto</th><th>Desconto</th><th>Líquido</th><th>Preço/kg</th><th>Total</th></tr>${detalhes||'<tr><td colspan="9">Nenhuma compra ativa encontrada.</td></tr>'}</table></div></div>`;
+}
+window.imprimirRelatorioComprasV170=function(){
+ const f=filtrosRelatorioComprasV170();if(f.di&&f.df&&f.di>f.df)return alert('A data inicial não pode ser posterior à data final.');const d=dadosRelatorioComprasV170(f.di,f.df,f.fornecedorId,f.material);if(!d.linhas.length)return alert('Não há compras ativas para imprimir com os filtros selecionados.');
+ const coop=db.cooperativa||{},forn=(db.fornecedoresMateriais||[]).find(x=>String(x.id)===String(f.fornecedorId)),titulo=forn?.nome||'Todos os catadores/fornecedores',resumo=Object.entries(d.porMaterial).sort((a,b)=>b[1].peso-a[1].peso).map(([m,x])=>`<tr><td>${escV160(m)}</td><td>${num(x.peso)} kg</td><td>${moeda(x.valor)}</td><td>${moeda(x.peso?x.valor/x.peso:0)}/kg</td></tr>`).join(''),detalhes=d.linhas.map(l=>`<tr><td>${formatarDataBR(l.compra.data)}</td><td>${escV160(l.compra.numero)}</td><td>${escV160(l.material)}</td><td>${num(l.pesoLiquido)} kg</td><td>${moeda(l.preco)}</td><td>${moeda(l.total)}</td></tr>`).join('');
+ const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Compras</title><style>*{box-sizing:border-box}body{font-family:Segoe UI,Arial;color:#263238;margin:0;background:#edf2f6}.acoes,.doc{max-width:950px;margin:12px auto}.acoes{text-align:right}.acoes button{background:#1f4e79;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:800}.doc{background:#fff}.topo{background:#1f4e79;color:#fff;border-bottom:6px solid #d4af37;padding:18px 24px}.topo h1{margin:0 0 7px;font-size:22px}.corpo{padding:22px}.ident{border-left:5px solid #d4af37;padding:10px 13px;background:#fff8e5;margin-bottom:16px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}.card{border:1px solid #dce5ec;padding:10px}.card small{display:block;color:#60717d}.card strong{font-size:17px;color:#1f4e79}h2{font-size:14px;color:#1f4e79;border-bottom:2px solid #d4af37;padding-bottom:4px}table{width:100%;border-collapse:collapse;margin-bottom:18px}th{background:#1f4e79;color:#fff}th,td{border:1px solid #dce5ec;padding:6px;text-align:center;font-size:10px}.rodape{text-align:center;border-top:2px solid #d4af37;padding-top:8px;color:#60717d;font-size:9px}@page{size:A4 landscape;margin:10mm}@media print{body{background:#fff}.acoes{display:none}.doc{margin:0;max-width:none}.topo,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}.corpo{padding:7mm}}</style></head><body><div class="acoes"><button onclick="window.print()">🖨️ Imprimir / Salvar em PDF</button></div><main class="doc"><header class="topo"><h1>Relatório de Compras por Catador/Fornecedor</h1><strong>${escV160(coop.nome||coop.nomeFantasia||'Cooperativa/Associação')}</strong><div>${coop.cnpj?'CNPJ: '+escV160(coop.cnpj)+' • ':''}${escV160([coop.municipio,coop.uf].filter(Boolean).join(' / '))}</div></header><div class="corpo"><div class="ident"><strong>${escV160(titulo)}</strong>${forn?.cpfCnpj?'<br>CPF/CNPJ: '+escV160(forn.cpfCnpj):''}<br>Período: ${f.di?formatarDataBR(f.di):'início'} a ${f.df?formatarDataBR(f.df):'hoje'}${f.material?'<br>Material: '+escV160(f.material):''}</div><div class="cards"><div class="card"><small>Compras</small><strong>${new Set(d.linhas.map(l=>String(l.compra.id))).size}</strong></div><div class="card"><small>Peso líquido</small><strong>${num(d.peso)} kg</strong></div><div class="card"><small>Valor total</small><strong>${moeda(d.valor)}</strong></div></div><h2>Resumo por material</h2><table><tr><th>Material</th><th>Peso líquido</th><th>Valor</th><th>Preço médio</th></tr>${resumo}</table><h2>Detalhamento</h2><table><tr><th>Data</th><th>Comprovante</th><th>Material</th><th>Peso líquido</th><th>Preço/kg</th><th>Total</th></tr>${detalhes}</table><div class="rodape">SIGRES — Relatório emitido em ${formatarDataBR(hojeV160())}</div></div></main></body></html>`;const w=window.open('','_blank','width=1100,height=820');if(!w)return alert('Autorize pop-ups para imprimir o relatório.');w.document.open();w.document.write(html);w.document.close();
+};
+
+window.imprimirTicketRelatorioComprasV170=function(){
+ const f=filtrosRelatorioComprasV170();if(f.di&&f.df&&f.di>f.df)return alert('A data inicial não pode ser posterior à data final.');if(!f.fornecedorId)return alert('Selecione um catador/fornecedor para emitir o ticket consolidado.');
+ const d=dadosRelatorioComprasV170(f.di,f.df,f.fornecedorId,f.material);if(!d.linhas.length)return alert('Não há compras ativas para imprimir com os filtros selecionados.');
+ const coop=db.cooperativa||{},forn=(db.fornecedoresMateriais||[]).find(x=>String(x.id)===String(f.fornecedorId))||{},agora=new Date(),emitido=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),resumo=Object.entries(d.porMaterial).sort((a,b)=>b[1].peso-a[1].peso).map(([m,x])=>`<div class="item"><strong>${escV160(m)}</strong><div class="linha"><span>${num(x.peso)} kg</span><b>${moeda(x.valor)}</b></div><small>Preço médio: ${moeda(x.peso?x.valor/x.peso:0)}/kg</small></div>`).join(''),compras=new Set(d.linhas.map(l=>String(l.compra.id))).size;
+ const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Resumo de compras</title><style>*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}body{width:74mm;padding:2mm;font-family:"Courier New",monospace;color:#000;font-size:10.5px;line-height:1.28}.acoes{text-align:center;margin-bottom:3mm}.acoes button{font-family:Arial;border:0;background:#111;color:#fff;padding:7px 10px;font-weight:bold}.centro{text-align:center}.org{font-size:12px;font-weight:bold;text-transform:uppercase}.sep{border-top:1px dashed #000;margin:2mm 0}.linha{display:flex;justify-content:space-between;gap:3mm}.item{padding:1.5mm 0;border-bottom:1px dashed #000}.item strong{display:block;text-transform:uppercase}.item small{display:block}.total{font-size:14px;font-weight:bold;margin-top:2mm}.aviso{margin-top:3mm;text-align:center;font-size:9px}@page{size:80mm auto;margin:2mm}@media print{.acoes{display:none}body{width:74mm;padding:0}}</style></head><body><div class="acoes"><button onclick="window.print()">Imprimir ticket</button></div><div class="centro"><div class="org">${escV160(coop.nome||coop.nomeFantasia||'Cooperativa/Associação')}</div>${coop.cnpj?`<div>CNPJ ${escV160(coop.cnpj)}</div>`:''}<div>${escV160(coop.endereco||[coop.municipio,coop.uf].filter(Boolean).join(' / '))}</div>${coop.telefone?`<div>${escV160(coop.telefone)}</div>`:''}</div><div class="sep"></div><div class="centro"><strong>RESUMO DE COMPRAS</strong></div><div class="sep"></div><strong>${escV160(forn.nome||'Catador/Fornecedor')}</strong><div>${escV160(forn.cpfCnpj||'Documento não informado')}</div><div>Período: ${f.di?formatarDataBR(f.di):'início'} a ${f.df?formatarDataBR(f.df):'hoje'}</div>${f.material?`<div>Material: ${escV160(f.material)}</div>`:''}<div class="sep"></div>${resumo}<div class="linha"><span>COMPRAS</span><b>${compras}</b></div><div class="linha"><span>PESO LÍQUIDO</span><b>${num(d.peso)} kg</b></div><div class="linha total"><span>VALOR TOTAL</span><span>${moeda(d.valor)}</span></div><div class="linha"><span>PREÇO MÉDIO</span><span>${moeda(d.peso?d.valor/d.peso:0)}/kg</span></div><div class="sep"></div><div>Emitido: ${escV160(emitido)}</div><div class="aviso">Resumo consolidado para controle interno.<br>Não substitui documento fiscal.</div></body></html>`;
+ const w=window.open('','_blank','width=420,height=760');if(!w)return alert('Autorize pop-ups para imprimir o ticket.');w.document.open();w.document.write(html);w.document.close();
+};
+
+window.emitirTicketCompraV170=function(id){
+ const c=(db.compras||[]).find(x=>String(x.id)===String(id));if(!c)return alert('Compra não localizada.');const coop=db.cooperativa||{},forn=fornecedorDaCompraV162(c)||{},momento=Number(c.id)&&String(c.id).length>=12?new Date(Number(c.id)):new Date(),hora=momento.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),itens=(c.itens||[]).map(i=>`<div class="item"><strong>${escV160(i.material)}</strong><div class="linha"><span>${num(i.pesoLiquido)} kg × ${moeda(i.precoUnit)}</span><b>${moeda(numeroV160(i.total)||(numeroV160(i.pesoLiquido)*numeroV160(i.precoUnit)))}</b></div>${numeroV160(i.desconto)>0?`<small>Desconto/impurezas: ${num(i.desconto)} kg</small>`:''}</div>`).join('');
+ const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Ticket ${escV160(c.numero)}</title><style>*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}body{width:74mm;padding:2mm;font-family:"Courier New",monospace;color:#000;font-size:10.5px;line-height:1.28}.acoes{text-align:center;margin-bottom:3mm}.acoes button{font-family:Arial;border:0;background:#111;color:#fff;padding:7px 10px;font-weight:bold}.centro{text-align:center}.org{font-size:12px;font-weight:bold;text-transform:uppercase}.sep{border-top:1px dashed #000;margin:2mm 0}.linha{display:flex;justify-content:space-between;gap:3mm}.item{padding:1.5mm 0;border-bottom:1px dashed #000}.item strong{display:block;text-transform:uppercase}.item small{display:block}.total{font-size:14px;font-weight:bold;margin-top:2mm}.aviso{margin-top:3mm;text-align:center;font-size:9px}.assinatura{margin-top:11mm;border-top:1px solid #000;text-align:center;padding-top:1mm}@page{size:80mm auto;margin:2mm}@media print{.acoes{display:none}body{width:74mm;padding:0}}</style></head><body><div class="acoes"><button onclick="window.print()">Imprimir ticket</button></div><div class="centro"><div class="org">${escV160(coop.nome||coop.nomeFantasia||'Cooperativa/Associação')}</div>${coop.cnpj?`<div>CNPJ ${escV160(coop.cnpj)}</div>`:''}<div>${escV160(coop.endereco||[coop.municipio,coop.uf].filter(Boolean).join(' / '))}</div>${coop.telefone?`<div>${escV160(coop.telefone)}</div>`:''}</div><div class="sep"></div><div class="centro"><strong>COMPROVANTE DE COMPRA</strong></div><div class="linha"><span>${escV160(c.numero)}</span><span>${formatarDataBR(c.data)} ${hora}</span></div><div class="sep"></div><strong>${escV160(nomeFornecedorCompraV162(c))}</strong><div>${escV160(documentoFornecedorCompraV162(c)||'Documento não informado')}</div><div class="sep"></div>${itens}<div class="linha"><span>PESO LÍQUIDO</span><b>${num(c.pesoLiquido)} kg</b></div><div class="linha total"><span>VALOR TOTAL</span><span>${moeda(c.total)}</span></div><div class="linha"><span>PAGAMENTO</span><span>${escV160(c.formaPagamento||'-')}</span></div><div class="sep"></div><div>Responsável: ${escV160(c.responsavel||'Não informado')}</div><div class="assinatura">${escV160(nomeFornecedorCompraV162(c))}<br>Catador/Fornecedor</div><div class="aviso">Obrigado pela parceria.<br>Comprovante de controle interno.<br>Não substitui documento fiscal.</div></body></html>`;const w=window.open('','_blank','width=420,height=760');if(!w)return alert('Autorize pop-ups para imprimir o ticket.');w.document.open();w.document.write(html);w.document.close();
+};
 if(currentView==='compras')renderComprasV160();
+})();
+</script>
+<!-- ===== SIGRES Etapa 3 - Relatório individual de compras ===== -->
+<style id="sigresRelatorioComprasV170Style">
+.rel-compra-identificacao{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;background:#eef5fa;border-left:5px solid #d4af37;border-radius:12px;padding:.8rem 1rem;margin:.8rem 0}
+.rel-compra-identificacao strong{color:#1f4e79;font-size:1.05rem}.rel-compra-identificacao span{color:#60717d}
+#resultadoRelCompraV170>.card-panel{margin-top:1rem}
+</style>
+<!-- ===== SIGRES Etapa 2 - Visualização padronizada de senha e PIN ===== -->
+<style id="sigresOlhoSenhaStyle">
+.acesso-senha-wrap{position:relative;display:flex;align-items:center;width:100%}
+.acesso-senha-wrap input{width:100%;padding-right:48px!important}
+.acesso-senha-olho{position:absolute!important;right:5px;top:50%;transform:translateY(-50%);width:38px!important;height:36px!important;min-width:38px!important;padding:0!important;margin:0!important;border:0!important;border-radius:8px!important;background:transparent!important;color:#1f4e79!important;box-shadow:none!important;font-size:1.05rem!important;line-height:1!important;cursor:pointer}
+.acesso-senha-olho:hover,.acesso-senha-olho:focus{background:#e8eef4!important;outline:2px solid transparent}
+</style>
+<!-- ===== SIGRES Etapa 1 - Ficha ampliada do cooperado ===== -->
+<style id="sigresEtapa1CooperadoStyle">
+.coop-ficha-modal{position:fixed;inset:0;background:rgba(15,35,52,.72);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px}
+.coop-ficha-box{width:min(980px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 22px 60px rgba(0,0,0,.28)}
+.coop-ficha-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;background:#1f4e79;color:#fff;border-bottom:5px solid #d4af37}
+.coop-ficha-head h2{margin:0;color:#fff}.coop-ficha-head button{min-width:auto;background:#fff;color:#1f4e79;padding:.55rem .8rem}
+.coop-ficha-body{padding:20px}.coop-ficha-section{margin-bottom:18px}.coop-ficha-section h3{margin:0 0 8px;color:#1f4e79;border-bottom:2px solid #d4af37;padding-bottom:5px}
+.coop-ficha-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.coop-ficha-campo{border:1px solid #dce5ec;border-radius:10px;padding:9px 11px;min-height:56px}.coop-ficha-campo.wide{grid-column:span 2}.coop-ficha-campo.full{grid-column:1/-1}
+.coop-ficha-campo small{display:block;color:#60717d;text-transform:uppercase;font-size:.68rem;font-weight:800;margin-bottom:3px}.coop-ficha-campo strong{overflow-wrap:anywhere}
+.coop-ficha-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:8px}
+@media(max-width:720px){.coop-ficha-grid{grid-template-columns:1fr}.coop-ficha-campo.wide{grid-column:auto}}
+</style>
+<script>
+(function(){
+'use strict';
+const opcoesEscolaridade=['Não informado','Não alfabetizado','Alfabetizado','Ensino Fundamental incompleto','Ensino Fundamental completo','Ensino Médio incompleto','Ensino Médio completo','Ensino Técnico','Ensino Superior incompleto','Ensino Superior completo','Pós-graduação'];
+const opcoesEstadoCivil=['Não informado','Solteiro(a)','Casado(a)','União estável','Separado(a)','Divorciado(a)','Viúvo(a)'];
+const opcoesSimNao=['Não informado','Sim','Não'];
+const optionTags=(lista,valor='')=>lista.map(x=>`<option value="${escapeHtml(x)}" ${x===valor?'selected':''}>${escapeHtml(x)}</option>`).join('');
+const valorCampo=id=>(document.getElementById(id)?.value||'').trim();
+
+const renderCooperadosBaseEtapa1=renderCooperados;
+renderCooperados=function(){
+    renderCooperadosBaseEtapa1();
+    const foto=document.getElementById('coopFoto');
+    if(foto?.closest('.field'))foto.closest('.field').remove();
+    const turnoAtual=document.getElementById('coopTurno');
+    if(turnoAtual&&turnoAtual.tagName!=='SELECT'){
+        const valor=turnoAtual.value||'';
+        const seletor=document.createElement('select');seletor.id='coopTurno';
+        seletor.innerHTML=`<option value="">Selecione</option><option>Manhã</option><option>Tarde</option><option>Integral</option>`;
+        turnoAtual.replaceWith(seletor);seletor.value=['Manhã','Tarde','Integral'].includes(valor)?valor:'';
+    }
+    const dadosOperacionais=[...document.querySelectorAll('.form-section h3')].find(h=>h.textContent.trim()==='Dados Operacionais')?.closest('.form-section');
+    if(dadosOperacionais){
+        dadosOperacionais.insertAdjacentHTML('beforebegin',`
+        <div class="form-section"><h3>Informações Pessoais e Sociais</h3>
+          <div class="form-grid three">
+            <div class="field"><label for="coopEstadoCivil">Estado civil</label><select id="coopEstadoCivil">${optionTags(opcoesEstadoCivil)}</select></div>
+            <div class="field"><label for="coopEscolaridade">Grau de escolaridade</label><select id="coopEscolaridade">${optionTags(opcoesEscolaridade)}</select></div>
+            <div class="field"><label for="coopNis">NIS</label><input id="coopNis" inputmode="numeric" maxlength="14" placeholder="Número de Identificação Social"></div>
+          </div>
+          <div class="form-grid four">
+            <div class="field"><label for="coopCadUnico">Inscrito no CadÚnico?</label><select id="coopCadUnico">${optionTags(opcoesSimNao)}</select></div>
+            <div class="field"><label for="coopBolsaFamilia">Recebe Bolsa Família?</label><select id="coopBolsaFamilia">${optionTags(opcoesSimNao)}</select></div>
+            <div class="field"><label for="coopContribuinteInss">Contribuinte do INSS?</label><select id="coopContribuinteInss">${optionTags(opcoesSimNao)}</select></div>
+            <div class="field"><label for="coopOutroBeneficio">Recebe outro benefício governamental?</label><select id="coopOutroBeneficio">${optionTags(opcoesSimNao)}</select></div>
+          </div>
+          <div class="form-grid three">
+            <div class="field" id="campoQualBeneficio" style="display:none"><label for="coopQualBeneficio">Qual benefício?</label><input id="coopQualBeneficio" placeholder="Informe o benefício recebido"></div>
+            <div class="field"><label for="coopAtualizacaoSocial">Data de atualização das informações</label><input type="date" id="coopAtualizacaoSocial"></div>
+          </div>
+        </div>`);
+        const alternarBeneficio=()=>{const campo=document.getElementById('campoQualBeneficio');if(campo)campo.style.display=document.getElementById('coopOutroBeneficio')?.value==='Sim'?'block':'none'};
+        document.getElementById('coopOutroBeneficio').onchange=alternarBeneficio;
+        if(editCoopId)popularFormCoop(editCoopId);
+        alternarBeneficio();
+    }
+};
+
+const popularFormCoopBaseEtapa1=popularFormCoop;
+popularFormCoop=function(id){
+    popularFormCoopBaseEtapa1(id);
+    const c=(db.cooperados||[]).find(x=>String(x.id)===String(id));if(!c)return;
+    const preencher=(id,valor)=>{const el=document.getElementById(id);if(el)el.value=valor||''};
+    preencher('coopEstadoCivil',c.estadoCivil||'Não informado');
+    preencher('coopEscolaridade',c.escolaridade||'Não informado');
+    preencher('coopNis',c.nis);
+    preencher('coopCadUnico',c.cadUnico||'Não informado');
+    preencher('coopBolsaFamilia',c.bolsaFamilia||'Não informado');
+    preencher('coopContribuinteInss',c.contribuinteInss||'Não informado');
+    preencher('coopOutroBeneficio',c.outroBeneficio||'Não informado');
+    preencher('coopQualBeneficio',c.qualBeneficio);
+    preencher('coopAtualizacaoSocial',c.atualizacaoSocial);
+    const campo=document.getElementById('campoQualBeneficio');if(campo)campo.style.display=c.outroBeneficio==='Sim'?'block':'none';
+};
+
+salvarCoopFn=function(){
+    const atual=editCoopId?(db.cooperados||[]).find(c=>String(c.id)===String(editCoopId)):null;
+    const cpfLimpo=somenteDigitos(document.getElementById('coopCpf').value);
+    if(cpfLimpo){const dup=(db.cooperados||[]).find(c=>String(c.id)!==String(editCoopId||'')&&registroAtivo(c)&&somenteDigitos(c.cpf)===cpfLimpo);if(dup)return alert(`CPF já cadastrado para: ${dup.nome}.`)}
+    const nome=valorCampo('coopNome');if(!nome)return alert('Informe o nome completo do cooperado.');
+    const nomeDup=(db.cooperados||[]).find(c=>String(c.id)!==String(editCoopId||'')&&registroAtivo(c)&&String(c.nome||'').trim().toLowerCase()===nome.toLowerCase());
+    if(nomeDup&&!confirm('Já existe cooperado ativo com nome igual ou muito semelhante. Deseja continuar?'))return;
+    const outroBeneficio=valorCampo('coopOutroBeneficio')||'Não informado';
+    const item={...(atual||{}),id:editCoopId||Date.now(),nome,cpf:valorCampo('coopCpf'),rg:valorCampo('coopRg'),telefone:valorCampo('coopTelefone'),endereco:valorCampo('coopEndereco'),bairro:valorCampo('coopBairro'),cidade:valorCampo('coopCidade'),uf:valorCampo('coopUf').toUpperCase(),cep:valorCampo('coopCep'),nascimento:valorCampo('coopNascimento'),emergencia:valorCampo('coopEmergencia'),estadoCivil:valorCampo('coopEstadoCivil')||'Não informado',escolaridade:valorCampo('coopEscolaridade')||'Não informado',nis:valorCampo('coopNis'),cadUnico:valorCampo('coopCadUnico')||'Não informado',bolsaFamilia:valorCampo('coopBolsaFamilia')||'Não informado',contribuinteInss:valorCampo('coopContribuinteInss')||'Não informado',outroBeneficio,qualBeneficio:outroBeneficio==='Sim'?valorCampo('coopQualBeneficio'):'',atualizacaoSocial:valorCampo('coopAtualizacaoSocial'),funcao:valorCampo('coopFuncao'),retiradaReferencia:Number(document.getElementById('coopRetiradaReferencia')?.value||0),ativo:valorCampo('coopAtivo'),situacaoOperacional:valorCampo('coopSituacao'),dataEntrada:valorCampo('coopDataEntrada'),turno:valorCampo('coopTurno'),meta:Number(document.getElementById('coopMeta')?.value)||0,banco:valorCampo('coopBanco'),agencia:valorCampo('coopAgencia'),conta:valorCampo('coopConta'),pix:valorCampo('coopPix'),docEntregue:valorCampo('coopDocEntregue'),termoAdesao:valorCampo('coopTermo'),observacoes:valorCampo('coopObs')};
+    if(item.uf&&item.uf.length!==2)return alert('UF deve ter 2 letras.');if(item.meta<0)return alert('Meta não pode ser negativa.');
+    if(item.situacaoOperacional==='Ativo')item.ativo='Sim';if(['Inativo','Férias','Afastado','Atestado','Desligado'].includes(item.situacaoOperacional))item.ativo='Não';
+    aplicarAuditoriaSalvar(item,atual);
+    const editando=!!editCoopId;
+    if(editando){const i=db.cooperados.findIndex(c=>String(c.id)===String(editCoopId));if(i>=0)db.cooperados[i]=item;editCoopId=null}else db.cooperados.push(item);
+    salvarDB();if(typeof mostrarToast==='function')mostrarToast(editando?'Cooperado atualizado com sucesso.':'Cooperado salvo com sucesso.','sucesso');renderCooperados();
+};
+
+const listarCooperadosBaseEtapa1=listarCooperados;
+listarCooperados=function(){
+    listarCooperadosBaseEtapa1();
+    document.querySelectorAll('#listaCoops .coop-actions-line').forEach(acoes=>{
+        const editar=acoes.querySelector('button[onclick^="editarCoop"]');if(!editar)return;
+        const id=(editar.getAttribute('onclick')||'').match(/\(([^)]+)\)/)?.[1];if(!id)return;
+        editar.insertAdjacentHTML('beforebegin',`<button class="mini-btn secondary" onclick="visualizarFichaCooperado(${id})">👁️ Visualizar ficha</button> <button class="mini-btn info" onclick="imprimirFichaCooperado(${id})">🖨️ Imprimir ficha</button> `);
+    });
+};
+
+const mostrarValor=v=>escapeHtml(String(v??'').trim()||'Não informado');
+const dataFicha=v=>v?formatarDataBR(v):'Não informada';
+function campoFicha(rotulo,valor,classe=''){return `<div class="coop-ficha-campo ${classe}"><small>${escapeHtml(rotulo)}</small><strong>${mostrarValor(valor)}</strong></div>`}
+function secoesFicha(c){return `
+ <section class="coop-ficha-section"><h3>Identificação</h3><div class="coop-ficha-grid">${campoFicha('Nome completo',c.nome,'wide')}${campoFicha('CPF',c.cpf)}${campoFicha('RG / Identidade',c.rg)}${campoFicha('Data de nascimento',dataFicha(c.nascimento))}${campoFicha('Estado civil',c.estadoCivil)}${campoFicha('Escolaridade',c.escolaridade)}${campoFicha('NIS',c.nis)}</div></section>
+ <section class="coop-ficha-section"><h3>Endereço e contatos</h3><div class="coop-ficha-grid">${campoFicha('Endereço',c.endereco,'wide')}${campoFicha('Bairro',c.bairro)}${campoFicha('Cidade/UF',[c.cidade,c.uf].filter(Boolean).join(' / '))}${campoFicha('CEP',c.cep)}${campoFicha('Telefone / WhatsApp',c.telefone)}${campoFicha('Contato de emergência',c.emergencia,'wide')}</div></section>
+ <section class="coop-ficha-section"><h3>Informações sociais e previdenciárias</h3><div class="coop-ficha-grid">${campoFicha('Inscrito no CadÚnico',c.cadUnico)}${campoFicha('Recebe Bolsa Família',c.bolsaFamilia)}${campoFicha('Contribuinte do INSS',c.contribuinteInss)}${campoFicha('Outro benefício governamental',c.outroBeneficio)}${campoFicha('Qual benefício',c.qualBeneficio,'wide')}${campoFicha('Informações atualizadas em',dataFicha(c.atualizacaoSocial))}</div></section>
+ <section class="coop-ficha-section"><h3>Informações operacionais</h3><div class="coop-ficha-grid">${campoFicha('Função',c.funcao)}${campoFicha('Turno',c.turno)}${campoFicha('Data de entrada',dataFicha(c.dataEntrada))}${campoFicha('Situação operacional',c.situacaoOperacional)}${campoFicha('Conta para produtividade',c.ativo)}${campoFicha('Meta mensal',`${num(c.meta||0)} kg/mês`)}${campoFicha('Retirada de referência',Number(c.retiradaReferencia||0)>0?moeda(c.retiradaReferencia):'Não informada')}</div></section>
+ <section class="coop-ficha-section"><h3>Dados bancários</h3><div class="coop-ficha-grid">${campoFicha('Banco',c.banco)}${campoFicha('Agência',c.agencia)}${campoFicha('Conta',c.conta)}${campoFicha('Chave PIX',c.pix,'wide')}</div></section>
+ <section class="coop-ficha-section"><h3>Documentação e observações</h3><div class="coop-ficha-grid">${campoFicha('Documentos entregues',c.docEntregue)}${campoFicha('Termo de adesão',c.termoAdesao)}${campoFicha('Observações',c.observacoes,'full')}</div></section>`}
+
+window.visualizarFichaCooperado=function(id){
+    const c=(db.cooperados||[]).find(x=>String(x.id)===String(id));if(!c)return alert('Cooperado não localizado.');
+    const modal=document.createElement('div');modal.className='coop-ficha-modal';modal.innerHTML=`<div class="coop-ficha-box"><div class="coop-ficha-head"><h2>Ficha do Cooperado</h2><button type="button" data-fechar>✕ Fechar</button></div><div class="coop-ficha-body">${secoesFicha(c)}<div class="coop-ficha-actions"><button class="info" onclick="imprimirFichaCooperado(${c.id})">🖨️ Imprimir ficha</button></div></div></div>`;
+    document.body.appendChild(modal);modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=()=>modal.remove());modal.onclick=e=>{if(e.target===modal)modal.remove()};
+};
+
+window.imprimirFichaCooperado=function(id){
+    const c=(db.cooperados||[]).find(x=>String(x.id)===String(id));if(!c)return alert('Cooperado não localizado.');
+    const org=db.cooperativa||{},local=[org.municipio,org.uf].filter(Boolean).join('/ ')||[c.cidade,c.uf].filter(Boolean).join('/ ')||'Local não informado';
+    const hoje=new Date(),dataExtenso=hoje.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}),logo=document.querySelector('.sigres-logo')?.src||document.querySelector('.logo-area img')?.src||'';
+    const nomeInstitucional=org.nome||org.nomeFantasia||'Cooperativa/Associação não identificada';
+    const localInstitucional=[org.municipio,org.uf].filter(Boolean).join(' / ');
+    const enderecoInstitucional=org.endereco||localInstitucional||'Endereço não informado';
+    const contatoInstitucional=[org.telefone,org.email].filter(Boolean).join(' • ');
+    const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Ficha - ${escapeHtml(c.nome||'Cooperado')}</title><style>*{box-sizing:border-box}body{margin:0;background:#edf2f6;font-family:Segoe UI,Arial;color:#263238}.acoes{max-width:900px;margin:12px auto;text-align:right}.acoes button{border:0;border-radius:9px;padding:10px 15px;background:#1f4e79;color:#fff;font-weight:800}.doc{max-width:900px;margin:auto;background:#fff;border:1px solid #dce5ec}.topo{padding:18px 24px;background:#1f4e79;color:#fff;border-bottom:6px solid #d4af37;display:flex;justify-content:space-between;align-items:center}.topo h1{font-size:21px;margin:0 0 8px}.topo .org{font-size:13px;font-weight:800;margin-bottom:3px}.topo .detalhe{font-size:10px;line-height:1.4;color:#eef5fb}.topo img{width:68px;height:68px;object-fit:contain}.corpo{padding:22px}.sec{margin-bottom:14px}.sec h3{font-size:14px;color:#1f4e79;border-bottom:2px solid #d4af37;padding-bottom:4px;margin:0 0 7px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.campo{border:1px solid #dce5ec;padding:7px 9px;min-height:48px}.campo.wide{grid-column:span 2}.campo.full{grid-column:1/-1}.campo small{display:block;text-transform:uppercase;color:#60717d;font-size:8px;font-weight:800}.campo strong{font-size:11px;overflow-wrap:anywhere}.local{margin-top:28px;text-align:right;font-size:12px}.assinatura{width:360px;max-width:80%;margin:55px auto 8px;text-align:center;border-top:1px solid #263238;padding-top:6px;font-size:12px}.assinatura strong{display:block}.rodape{margin-top:22px;border-top:2px solid #d4af37;padding-top:8px;text-align:center;color:#60717d;font-size:9px}@page{size:A4;margin:10mm}@media print{body{background:#fff}.acoes{display:none}.doc{border:0}.topo{-webkit-print-color-adjust:exact;print-color-adjust:exact}.corpo{padding:8mm}}</style></head><body><div class="acoes"><button onclick="window.print()">🖨️ Imprimir / Salvar em PDF</button></div><main class="doc"><header class="topo"><div><h1>Ficha Cadastral do Cooperado/Associado</h1><div class="org">${escapeHtml(nomeInstitucional)}</div><div class="detalhe">CNPJ: ${escapeHtml(org.cnpj||'Não informado')}</div><div class="detalhe">${escapeHtml(enderecoInstitucional)}</div>${contatoInstitucional?`<div class="detalhe">${escapeHtml(contatoInstitucional)}</div>`:''}</div>${logo?`<img src="${logo}">`:''}</header><div class="corpo">${secoesFicha(c).replaceAll('coop-ficha-section','sec').replaceAll('coop-ficha-grid','grid').replaceAll('coop-ficha-campo','campo')}<div class="local">${escapeHtml(local)}, ${escapeHtml(dataExtenso)}.</div><div class="assinatura"><strong>${escapeHtml(c.nome||'Cooperado')}</strong>Assinatura do cooperado/associado</div><div class="rodape">SIGRES — Solução Integrada de Gestão de Resíduos Sólidos</div></div></main></body></html>`;
+    const w=window.open('','_blank','width=980,height=820');if(!w)return alert('Autorize pop-ups para visualizar e imprimir a ficha.');w.document.open();w.document.write(html);w.document.close();
+};
+
+const renderCadastrosBaseEtapa1=renderCadastros;
+renderCadastros=function(){
+    renderCadastrosBaseEtapa1();
+    const c=db.cooperativa||{},cnpj=document.getElementById('cadCoopCnpj');
+    if(cnpj?.closest('.field'))cnpj.closest('.field').insertAdjacentHTML('afterend',`<div class="field"><label for="cadCoopEndereco">Endereço completo</label><input id="cadCoopEndereco" value="${escapeHtml(c.endereco||'')}" placeholder="Rua, número, bairro e complemento"></div>`);
+    else{
+        const rotulo=[...document.querySelectorAll('.metric-label')].find(el=>el.textContent.trim()==='CNPJ');
+        if(rotulo?.closest('.metric-box'))rotulo.closest('.metric-box').insertAdjacentHTML('afterend',`<div class="metric-box"><div class="metric-label">Endereço</div><div class="metric-value">${escapeHtml(c.endereco||'-')}</div></div>`);
+    }
+};
+
+salvarCooperativaV265A7=function(){
+    const atual=db.cooperativa||{},nome=valorCampo('cadCoopNome'),nomeFantasia=valorCampo('cadCoopNomeFantasia'),cnpj=valorCampo('cadCoopCnpj'),endereco=valorCampo('cadCoopEndereco'),municipio=valorCampo('cadCoopMunicipio'),uf=valorCampo('cadCoopUf').toUpperCase(),telefone=valorCampo('cadCoopTelefone'),email=valorCampo('cadCoopEmail'),presidente=valorCampo('cadCoopPresidente'),modeloRemuneracao=valorCampo('cadCoopModeloRemuneracao'),valorRemuneracaoFixa=Number(document.getElementById('cadCoopValorRemuneracaoFixa')?.value||0);
+    if(!nome)return alert('Informe o nome da cooperativa/associação.');if(!nomeFantasia)return alert('Informe o Nome Fantasia.');
+    if(modeloRemuneracao==='fixa'&&valorRemuneracaoFixa<=0)return alert('Informe o valor mensal da Retirada Fixa.');
+    if(cnpj&&somenteDigitos(cnpj).length!==14&&!confirm('CNPJ com quantidade de dígitos diferente do padrão. Deseja salvar mesmo assim?'))return;
+    if(!municipio)return alert('Informe o município.');if(uf.length!==2)return alert('UF deve ter 2 letras.');if(!validarEmailSimples(email))return alert('E-mail inválido. Verifique antes de salvar.');
+    db.cooperativa={...atual,nome,nomeFantasia,cnpj,endereco,municipio,uf,telefone,email,presidente,modeloRemuneracao,valorRemuneracaoFixa,alteradoEm:new Date().toISOString()};
+    window.__editCooperativaAtivo=false;salvarDB();if(typeof mostrarToast==='function')mostrarToast('Dados da cooperativa/associação salvos com sucesso.','sucesso');renderCadastros();
+};
+})();
+</script>
+<!-- ===== SIGRES Etapa 4 - Frequência simplificada por exceção e turno ===== -->
+<style id="sigresFrequenciaEtapa4Style">
+.freq-table-etapa4 td{vertical-align:top;padding:.38rem}.freq-table-etapa4 .freq-select{width:104px;min-width:104px}
+.freq-turno-select{width:104px;min-width:104px;margin-top:.22rem;padding:.34rem .38rem;border-radius:9px;font-size:.72rem;font-weight:800;background:#fff6df;color:#7a5600;border:1px solid #d4af37}
+.freq-motivo-select{width:104px;min-width:104px;margin-top:.22rem;padding:.34rem .38rem;border-radius:9px;font-size:.72rem;font-weight:800;background:#fdecec;color:#9d1717;border:1px solid #b91c1c}
+.freq-turno-chip{display:inline-block;margin-top:.2rem;padding:.14rem .35rem;border-radius:999px;background:#eef5fa;color:#1f4e79;font-size:.67rem;font-weight:800}
+</style>
+<script>
+/* A presença é a regra; o administrador registra somente as exceções. */
+(function(){
+function pesoAusenciaFrequenciaEtapa4(reg){return reg?.status==='A'&&(reg.periodoAusencia==='Manhã'||reg.periodoAusencia==='Tarde')?.5:reg?.status==='A'?1:0}
+function formatarQuantidadeFrequenciaEtapa4(v){return Number.isInteger(Number(v))?String(Number(v)):num(Number(v)||0,1)}
+function inicializarFrequenciaEtapa4(mes,ano){
+ if(frequenciaEstaFechada(mes,ano))return false;
+ normalizarFrequenciaBase();let alterou=false,dias=diasNoMes(mes,ano),prefixo=`${ano}-${String(mes).padStart(2,'0')}-`;
+ cooperadosAtivosLista().forEach(c=>{for(let d=1;d<=dias;d++){
+  const data=prefixo+String(d).padStart(2,'0');let reg=getFreqRegistro(c.id,data);
+  if(!reg){reg={id:Date.now()+Math.random(),cooperadoId:c.id,data,status:'P',periodoAusencia:'',observacao:'',geradoAutomaticamente:true};prepararAuditoriaRegistro(reg);db.frequencia.push(reg);alterou=true}
+  else if(reg.status==='N'){reg.status='P';reg.periodoAusencia='';reg.alteradoEm=agoraISO();alterou=true}
+ }});
+ if(alterou)salvarDB();return alterou;
+}
+window.resumoFrequenciaCooperado=function(coopId,mes,ano){
+ const regs=frequenciasAtivas().filter(f=>String(f.cooperadoId)===String(coopId)&&mesmoMesAno(f.data,mes,ano)&&['P','A','J'].includes(f.status));
+ let presencas=0,faltas=0,justificadas=0;regs.forEach(f=>{if(f.status==='P'||f.status==='J'){presencas+=1;return}const peso=pesoAusenciaFrequenciaEtapa4(f);presencas+=1-peso;if(motivoAusenciaLabel(f.motivoAusencia)==='Falta')faltas+=peso;else justificadas+=peso});
+ return {presencas,faltas,justificadas,diasConsiderados:presencas+justificadas,diasInformados:regs.length};
+};
+window.contarFaltas=function(mes,ano){return frequenciasAtivas().filter(f=>mesmoMesAno(f.data,mes,ano)&&f.status==='A').reduce((s,f)=>s+pesoAusenciaFrequenciaEtapa4(f),0)};
+window.contarAusenciasPorMotivo=function(mes,ano){const obj={Falta:0,Atestado:0,Férias:0,Licença:0,Capacitação:0,Outro:0};frequenciasAtivas().filter(f=>mesmoMesAno(f.data,mes,ano)&&f.status==='A').forEach(f=>{const m=motivoAusenciaLabel(f.motivoAusencia);obj[m]=(obj[m]||0)+pesoAusenciaFrequenciaEtapa4(f)});return obj};
+window.freqMedia=function(mes,ano){const regs=frequenciasAtivas().filter(f=>mesmoMesAno(f.data,mes,ano)&&['P','A','J'].includes(f.status));if(!regs.length)return 0;let considerados=0;regs.forEach(f=>{if(f.status==='P'||f.status==='J')considerados+=1;else{const peso=pesoAusenciaFrequenciaEtapa4(f);considerados+=1-(motivoAusenciaLabel(f.motivoAusencia)==='Falta'?peso:0)}});return considerados/regs.length*100};
+window.diasPerdidosFrequencia=function(mes,ano){return frequenciasAtivas().filter(f=>mesmoMesAno(f.data,mes,ano)&&f.status==='A'&&['Falta','Atestado','Licença'].includes(motivoAusenciaLabel(f.motivoAusencia))).reduce((s,f)=>s+pesoAusenciaFrequenciaEtapa4(f),0)};
+window.metricasFrequenciaHoje=function(){const hoje=hojeISO(),regs=frequenciasAtivas().filter(f=>String(f.data)===hoje);let presentes=0,ausentes=0;regs.forEach(f=>{if(f.status==='P'){presentes+=1}else if(f.status==='A'){const p=pesoAusenciaFrequenciaEtapa4(f);presentes+=1-p;ausentes+=p}});const motivos=contarAusenciasPorMotivo(Number(hoje.slice(5,7)),Number(hoje.slice(0,4)));return {presentes,ausentes,ferias:motivos.Férias||0,atestados:motivos.Atestado||0}};
+window.setFrequenciaEtapa4=function(coopId,data,valor){
+ const [ano,mes]=String(data).split('-');if(frequenciaEstaFechada(Number(mes),Number(ano)))return alert('A frequência desta competência está fechada. Reabra antes de alterar.');
+ let reg=getFreqRegistro(coopId,data);if(!reg){reg={id:Date.now()+Math.random(),cooperadoId:coopId,data};prepararAuditoriaRegistro(reg);db.frequencia.push(reg)}
+ reg.status=valor==='P'?'P':'A';reg.periodoAusencia=valor==='AM'?'Manhã':valor==='AT'?'Tarde':valor==='AI'?'Integral':'';if(reg.status==='A')reg.motivoAusencia=reg.motivoAusencia||'Falta';else reg.motivoAusencia='';reg.alteradoEm=agoraISO();reg.versaoRegistro=VERSAO_REGISTRO_AUDITORIA;salvarDB();carregarFrequencia();
+};
+window.alterarPeriodoFrequenciaEtapa4=function(coopId,data,periodo){let reg=getFreqRegistro(coopId,data);if(!reg)return;reg.status='A';reg.periodoAusencia=['Manhã','Tarde','Integral'].includes(periodo)?periodo:'Integral';reg.alteradoEm=agoraISO();salvarDB();carregarFrequencia()};
+window.renderFrequencia=function(){
+ normalizarFrequenciaBase();pessoasConteudo.innerHTML=`<div class="notice"><strong>Controle por exceção:</strong> todos os cooperados ativos entram como presentes no mês. Registre somente as faltas. Quando a ausência ocorrer em apenas um turno, selecione Manhã ou Tarde; ela será contabilizada como meio dia.</div><div class="filter-bar"><div class="filter-field"><label>Mês</label><select id="freqMes">${optMes(mesAtual(),false)}</select></div><div class="filter-field"><label>Ano</label><select id="freqAno">${optAno()}</select></div><button id="btnFreq" class="info">Atualizar</button><button id="btnFecharFreq" class="warning">🔒 Fechar frequência</button><label class="filtro-cancelados"><input type="checkbox" id="freqMostrarCanceladas"> Mostrar canceladas</label></div><div id="freqResumo"></div><div id="freqTabela"></div>`;
+ const atualizar=()=>{window.__freqScrollLeft=0;carregarFrequencia()};document.getElementById('btnFreq').onclick=atualizar;document.getElementById('freqMes').onchange=atualizar;document.getElementById('freqAno').onchange=atualizar;document.getElementById('btnFecharFreq').onclick=alternarFechamentoFrequencia;document.getElementById('freqMostrarCanceladas').onchange=carregarFrequencia;carregarFrequencia();
+};
+window.carregarFrequencia=function(){
+ const scrollAtual=document.getElementById('freqScrollArea')?.scrollLeft;if(Number.isFinite(scrollAtual))window.__freqScrollLeft=scrollAtual;
+ const mes=Number(document.getElementById('freqMes')?.value)||mesAtual(),ano=Number(document.getElementById('freqAno')?.value)||anoAtual(),dias=diasNoMes(mes,ano),fechada=frequenciaEstaFechada(mes,ano);inicializarFrequenciaEtapa4(mes,ano);const coops=cooperadosAtivosLista();
+ const btn=document.getElementById('btnFecharFreq');if(btn){btn.textContent=fechada?'↩️ Reabrir frequência':'🔒 Fechar frequência';btn.className=fechada?'secondary':'warning'}
+ const regsMes=frequenciasAtivas().filter(f=>mesmoMesAno(f.data,mes,ano)),faltas=regsMes.filter(f=>f.status==='A'&&motivoAusenciaLabel(f.motivoAusencia)==='Falta').reduce((s,f)=>s+pesoAusenciaFrequenciaEtapa4(f),0),justificadas=regsMes.filter(f=>f.status==='A'&&motivoAusenciaLabel(f.motivoAusencia)!=='Falta').reduce((s,f)=>s+pesoAusenciaFrequenciaEtapa4(f),0);
+ document.getElementById('freqResumo').innerHTML=`<div class="dashboard-cards"><div class="card"><div>Cooperados ativos</div><div class="card-value">${coops.length}</div></div><div class="card"><div>Frequência média</div><div class="card-value">${num(freqMedia(mes,ano),1)}%</div></div><div class="card"><div>Faltas descontáveis</div><div class="card-value">${formatarQuantidadeFrequenciaEtapa4(faltas)}</div></div><div class="card"><div>Ausências justificadas</div><div class="card-value">${formatarQuantidadeFrequenciaEtapa4(justificadas)}</div></div></div><div class="notice" style="border-left-color:${fechada?'#008037':'#d4af37'}"><strong>${fechada?'✅ Frequência fechada:':'🟢 Presenças preenchidas:'}</strong> ${fechada?'competência confirmada e liberada para a remuneração.':'altere somente os dias em que houve falta integral ou em um turno.'}</div>`;
+ const host=document.getElementById('freqTabela');if(!coops.length){host.innerHTML='<div class="empty">Cadastre cooperados ativos para gerar a frequência.</div>';return}
+ const lista=Array.from({length:dias},(_,i)=>i+1),head=lista.map(d=>`<th>${String(d).padStart(2,'0')}</th>`).join('');
+ const rows=coops.map(c=>{const tds=lista.map(n=>{const data=`${ano}-${String(mes).padStart(2,'0')}-${String(n).padStart(2,'0')}`,reg=getFreqRegistro(c.id,data),ausente=reg?.status==='A',periodo=reg?.periodoAusencia||'Integral',valor=ausente?(periodo==='Manhã'?'AM':periodo==='Tarde'?'AT':'AI'):'P',motivo=reg?.motivoAusencia||'Falta',cls=ausente?'ausente':'presente';return `<td><select class="freq-select ${cls}" ${fechada?'disabled':''} onchange="setFrequenciaEtapa4(${c.id},'${data}',this.value)"><option value="P" ${valor==='P'?'selected':''}>Presente</option><option value="AI" ${valor==='AI'?'selected':''}>Falta integral</option><option value="AM" ${valor==='AM'?'selected':''}>Falta manhã</option><option value="AT" ${valor==='AT'?'selected':''}>Falta tarde</option></select>${ausente?`<select class="freq-motivo-select" ${fechada?'disabled':''} onchange="alterarMotivoFrequencia(${c.id},'${data}',this.value)">${MOTIVOS_AUSENCIA_V2654.map(m=>`<option value="${m}" ${motivo===m?'selected':''}>${m}</option>`).join('')}</select>`:''}${reg?`<div><button class="mini-btn secondary" style="padding:.16rem .32rem;margin-top:.2rem" title="Observação" onclick="editarObservacaoFrequencia(${c.id},'${data}')">📝</button></div>`:''}</td>`}).join('');
+  const regs=regsMes.filter(f=>String(f.cooperadoId)===String(c.id)),r=resumoFrequenciaCooperado(c.id,mes,ano),perc=r.diasInformados?r.diasConsiderados/r.diasInformados*100:0;return `<tr><td class="freq-coop-sticky" style="text-align:left"><strong>${escapeHtml(c.nome)}</strong><br><span class="muted">${escapeHtml(c.funcao||'')}</span><br><span class="freq-turno-chip">Turno: ${escapeHtml(c.turno||'Não informado')}</span></td>${tds}<td><strong>${formatarQuantidadeFrequenciaEtapa4(r.presencas)}</strong></td><td><strong>${formatarQuantidadeFrequenciaEtapa4(r.faltas)}</strong></td><td><strong>${formatarQuantidadeFrequenciaEtapa4(r.justificadas)}</strong></td><td><strong>${num(perc,1)}%</strong></td></tr>`}).join('');
+ let canceladas='';if(document.getElementById('freqMostrarCanceladas')?.checked){const itens=frequenciasCanceladas().filter(f=>mesmoMesAno(f.data,mes,ano));canceladas=`<div class="card-panel"><h3>🚫 Frequências canceladas</h3><div class="table-wrap"><table><tr><th>Data</th><th>Cooperado</th><th>Status original</th><th>Cancelado por</th><th>Data do cancelamento</th><th>Motivo</th></tr>${itens.map(f=>{const c=(db.cooperados||[]).find(x=>String(x.id)===String(f.cooperadoId));return `<tr class="linha-registro-cancelado"><td>${formatarDataBR(f.data)}</td><td>${escapeHtml(c?.nome||'Não identificado')}</td><td>${freqStatusTexto(f.status)}${f.status==='A'?` - ${escapeHtml(f.periodoAusencia||'Integral')} - ${escapeHtml(f.motivoAusencia||'Falta')}`:''}</td><td>${escapeHtml(f.canceladoPor||'-')}</td><td>${f.canceladoEm?new Date(f.canceladoEm).toLocaleString('pt-BR'):'-'}</td><td>${escapeHtml(f.motivoCancelamento||'-')}</td></tr>`}).join('')||'<tr><td colspan="6">Sem frequências canceladas no período.</td></tr>'}</table></div></div>`}
+ host.innerHTML=`<div class="table-wrap freq-scroll-area" id="freqScrollArea"><table class="freq-table freq-table-etapa4"><tr><th class="freq-coop-sticky">Cooperado</th>${head}<th>Pres.</th><th>Faltas</th><th>Just.</th><th>%</th></tr>${rows}</table></div>${canceladas}`;requestAnimationFrame(()=>{const area=document.getElementById('freqScrollArea');if(area)area.scrollLeft=Math.max(0,Number(window.__freqScrollLeft)||0)});
+};
+})();
+</script>
+<!-- ===== SIGRES Etapa 5.1 - Relatório padronizado de Produção ===== -->
+<script>
+(function(){
+const renderProducaoBaseEtapa51=renderProducao;
+renderProducao=function(){
+ renderProducaoBaseEtapa51();
+ const limpar=document.getElementById('btnLimparProd');
+ if(limpar&&!document.getElementById('btnRelatorioProducaoEtapa51')){
+  limpar.insertAdjacentHTML('afterend','<button id="btnRelatorioProducaoEtapa51" class="warning">📄 Imprimir / PDF</button>');
+  document.getElementById('btnRelatorioProducaoEtapa51').onclick=imprimirRelatorioProducaoEtapa51;
+ }
+};
+function filtrosRelatorioProducaoEtapa51(){return {mes:document.getElementById('fProdMes')?.value||'',ano:document.getElementById('fProdAno')?.value||'',categoria:document.getElementById('fProdCategoria')?.value||'',material:document.getElementById('fProdMaterial')?.value||'',tipo:document.getElementById('fProdTipo')?.value||''}}
+function periodoRelatorioProducaoEtapa51(f){return f.mes?`${mesNome(Number(f.mes))}/${f.ano||anoAtual()}`:`Ano de ${f.ano||anoAtual()}`}
+window.imprimirRelatorioProducaoEtapa51=function(){
+ const f=filtrosRelatorioProducaoEtapa51(),lista=filtrarProducao().filter(registroAtivo).sort((a,b)=>String(a.data).localeCompare(String(b.data))||(Number(a.id)||0)-(Number(b.id)||0));
+ if(!lista.length)return alert('Não há registros ativos de produção para imprimir com os filtros selecionados.');
+ const coop=db.cooperativa||{},r=resumoProducao(lista),porMaterial={},porCategoria={};
+ lista.forEach(p=>{const qtd=Number(p.quantidade)||0,mat=p.material||'Não informado',cat=p.categoria||'Não informada';if(!porMaterial[mat])porMaterial[mat]={quantidade:0,registros:0,unidade:p.unidade||'kg'};porMaterial[mat].quantidade+=qtd;porMaterial[mat].registros++;porCategoria[cat]=(porCategoria[cat]||0)+qtd});
+ const materiais=Object.entries(porMaterial).sort((a,b)=>b[1].quantidade-a[1].quantidade),categorias=Object.entries(porCategoria).sort((a,b)=>b[1]-a[1]);
+ const resumoMateriais=materiais.map(([nome,x])=>`<tr><td>${escapeHtml(nome)}</td><td>${x.registros}</td><td>${num(x.quantidade)} ${escapeHtml(x.unidade)}</td><td>${num(r.total?x.quantidade/r.total*100:0,1)}%</td></tr>`).join('');
+ const resumoCategorias=categorias.map(([nome,qtd])=>`<tr><td>${escapeHtml(nome)}</td><td>${num(qtd)} kg</td><td>${num(r.total?qtd/r.total*100:0,1)}%</td></tr>`).join('');
+ const detalhes=lista.map(p=>`<tr><td>${formatarDataBR(p.data)}</td><td>${escapeHtml(p.material||'-')}</td><td>${escapeHtml(p.categoria||'-')}</td><td>${escapeHtml(p.tipo||'-')}</td><td>${num(p.quantidade)} ${escapeHtml(p.unidade||'kg')}</td><td>${p.catadores||'-'}</td><td>${num(p.produtividade||0,2)}</td><td>${escapeHtml(p.observacoes||'-')}</td></tr>`).join('');
+ const filtros=[f.categoria&&`Categoria: ${f.categoria}`,f.material&&`Material: ${f.material}`,f.tipo&&`Tipo: ${f.tipo}`].filter(Boolean).join(' • ')||'Todos os materiais, categorias e tipos';
+ const endereco=coop.endereco||[coop.municipio,coop.uf].filter(Boolean).join(' / '),contato=[coop.telefone,coop.email].filter(Boolean).join(' • '),emissao=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}),logoSigres=document.querySelector('.acesso-marca img')?.src||document.querySelector('.sigres-logo')?.src||'';
+ const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Produção</title><style>*{box-sizing:border-box}body{font-family:Segoe UI,Arial;color:#263238;margin:0;background:#edf2f6}.acoes,.doc{max-width:1050px;margin:12px auto}.acoes{text-align:right}.acoes button{background:#1f4e79;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:800}.doc{background:#fff}.topo{background:#1f4e79;color:#fff;border-bottom:6px solid #d4af37;padding:17px 22px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.topo h1{margin:0 0 5px;font-size:22px}.topo .org{text-align:right;font-size:10px;line-height:1.45}.corpo{padding:20px}.ident{border-left:5px solid #d4af37;background:#fff8e5;padding:9px 12px;margin-bottom:14px;font-size:11px}.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:14px}.card{border:1px solid #dce5ec;padding:8px;text-align:center}.card small{display:block;color:#60717d;font-size:9px}.card strong{font-size:15px;color:#1f4e79}.duas{display:grid;grid-template-columns:1fr 1fr;gap:12px}h2{font-size:13px;color:#1f4e79;border-bottom:2px solid #d4af37;padding-bottom:4px;margin:13px 0 6px}table{width:100%;border-collapse:collapse;margin-bottom:12px}th{background:#1f4e79;color:#fff}th,td{border:1px solid #dce5ec;padding:5px;text-align:center;font-size:9px}td:nth-child(2){text-align:left}.rodape{text-align:center;border-top:2px solid #d4af37;padding-top:7px;color:#60717d;font-size:8px}@page{size:A4 landscape;margin:9mm}@media print{body{background:#fff}.acoes{display:none}.doc{margin:0;max-width:none}.topo,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}.corpo{padding:5mm}}</style></head><body><div class="acoes"><button onclick="window.print()">🖨️ Imprimir / Salvar em PDF</button></div><main class="doc"><header class="topo"><div><h1>Relatório de Produção</h1><div>SIGRES — Solução Integrada de Gestão de Resíduos Sólidos</div></div><div class="org"><strong>${escapeHtml(coop.nome||coop.nomeFantasia||'Cooperativa/Associação')}</strong>${coop.cnpj?`<br>CNPJ: ${escapeHtml(coop.cnpj)}`:''}${endereco?`<br>${escapeHtml(endereco)}`:''}${contato?`<br>${escapeHtml(contato)}`:''}</div></header><div class="corpo"><div class="ident"><strong>Período:</strong> ${escapeHtml(periodoRelatorioProducaoEtapa51(f))}<br><strong>Filtros:</strong> ${escapeHtml(filtros)}<br><strong>Regra:</strong> registros cancelados não integram este relatório.</div><div class="cards"><div class="card"><small>Produção total</small><strong>${num(r.total)} kg</strong></div><div class="card"><small>Processado</small><strong>${num(r.processado)} kg</strong></div><div class="card"><small>Bruto</small><strong>${num(r.bruto)} kg</strong></div><div class="card"><small>Rejeito</small><strong>${num(r.rejeito)} kg</strong></div><div class="card"><small>Eficiência</small><strong>${num(r.eficiencia,1)}%</strong></div></div><div class="duas"><div><h2>Resumo por material/produto</h2><table><tr><th>Material/produto</th><th>Registros</th><th>Quantidade</th><th>Participação</th></tr>${resumoMateriais}</table></div><div><h2>Resumo por categoria</h2><table><tr><th>Categoria</th><th>Quantidade</th><th>Participação</th></tr>${resumoCategorias}</table></div></div><h2>Detalhamento da produção</h2><table><tr><th>Data</th><th>Material/produto</th><th>Categoria</th><th>Tipo</th><th>Quantidade</th><th>Equipe</th><th>Produtividade</th><th>Observações</th></tr>${detalhes}</table><div class="rodape">${escapeHtml(coop.nome||coop.nomeFantasia||'SIGRES')} • Relatório emitido em ${escapeHtml(emissao)}</div></div></main></body></html>`;
+ const htmlComLogo=logoSigres?html.replace('</style>','.titulo-marca{display:flex;align-items:center;gap:14px}.titulo-marca img{width:66px;height:66px;object-fit:contain;flex:0 0 auto}</style>').replace('<header class="topo"><div>','<header class="topo"><div class="titulo-marca"><img src="'+logoSigres+'" alt="SIGRES"><div>').replace('</div></div><div class="org">','</div></div></div><div class="org">'):html;
+ const w=window.open('','_blank','width=1150,height=820');if(!w)return alert('Autorize pop-ups para imprimir o relatório.');w.document.open();w.document.write(htmlComLogo);w.document.close();
+};
+})();
+</script>
+<!-- ===== SIGRES Etapa 5.2 - Relatório padronizado de Vendas e Receitas ===== -->
+<script>
+(function(){
+const renderVendasBaseEtapa52=renderVendas;
+renderVendas=function(){
+ renderVendasBaseEtapa52();
+ const filtrar=document.getElementById('btnVendaFiltro');
+ if(filtrar&&!document.getElementById('btnRelatorioVendasEtapa52')){
+  filtrar.insertAdjacentHTML('afterend','<button id="btnRelatorioVendasEtapa52" class="warning">📄 Imprimir / PDF</button>');
+  document.getElementById('btnRelatorioVendasEtapa52').onclick=imprimirRelatorioVendasEtapa52;
+ }
+};
+function dadosRelatorioVendasEtapa52(){
+ const mes=document.getElementById('fVendaMes')?.value||'',ano=document.getElementById('fVendaAno')?.value||'',tipo=document.getElementById('fVendaTipoReceita')?.value||'',categoria=document.getElementById('fVendaCategoria')?.value||'',material=document.getElementById('fVendaMaterial')?.value||'';
+ const lista=(db.vendas||[]).filter(v=>{const matCad=(db.materiais||[]).find(m=>m.nome===v.material)||{},cat=v.categoria||matCad.categoria||'',tv=tipoReceitaVendaV130(v);return registroAtivo(v)&&mesmoMesAno(v.data,mes,ano)&&(!tipo||tv===tipo)&&(!categoria||(tv==='produto'&&cat===categoria))&&(!material||(tv==='produto'&&v.material===material))}).sort((a,b)=>String(a.data).localeCompare(String(b.data))||(Number(a.id)||0)-(Number(b.id)||0));
+ return {mes,ano,tipo,categoria,material,lista};
+}
+window.imprimirRelatorioVendasEtapa52=function(){
+ const d=dadosRelatorioVendasEtapa52();if(!d.lista.length)return alert('Não há vendas ou receitas ativas para imprimir com os filtros selecionados.');
+ const coop=db.cooperativa||{},produtos=d.lista.filter(vendaEhProdutoV130),servicos=d.lista.filter(vendaEhServicoV130),qtd=produtos.reduce((s,v)=>s+(Number(v.quantidade)||0),0),receitaProdutos=produtos.reduce((s,v)=>s+(Number(v.total)||0),0),receitaServicos=servicos.reduce((s,v)=>s+(Number(v.total)||0),0),receitaTotal=receitaProdutos+receitaServicos,mapItens={},mapClientes={};
+ d.lista.forEach(v=>{const serv=vendaEhServicoV130(v),nome=serv?(v.descricaoServico||'Serviço não informado'):(v.material||'Material não informado'),chave=(serv?'Serviço: ':'Produto: ')+nome;if(!mapItens[chave])mapItens[chave]={tipo:serv?'Serviço':'Produto',quantidade:0,valor:0,registros:0,unidade:v.unidade||'kg'};mapItens[chave].quantidade+=serv?0:(Number(v.quantidade)||0);mapItens[chave].valor+=Number(v.total)||0;mapItens[chave].registros++;const cliente=String(v.comprador||'Não informado').trim()||'Não informado';mapClientes[cliente]=(mapClientes[cliente]||0)+(Number(v.total)||0)});
+ const resumoItens=Object.entries(mapItens).sort((a,b)=>b[1].valor-a[1].valor).map(([nome,x])=>`<tr><td>${escapeHtml(nome)}</td><td>${x.registros}</td><td>${x.tipo==='Serviço'?'-':num(x.quantidade)+' '+escapeHtml(x.unidade)}</td><td>${moeda(x.valor)}</td><td>${num(receitaTotal?x.valor/receitaTotal*100:0,1)}%</td></tr>`).join('');
+ const resumoClientes=Object.entries(mapClientes).sort((a,b)=>b[1]-a[1]).map(([nome,valor])=>`<tr><td>${escapeHtml(nome)}</td><td>${moeda(valor)}</td><td>${num(receitaTotal?valor/receitaTotal*100:0,1)}%</td></tr>`).join('');
+ const detalhes=d.lista.map(v=>{const serv=vendaEhServicoV130(v),matCad=(db.materiais||[]).find(m=>m.nome===v.material)||{};return `<tr><td>${formatarDataBR(v.data)}</td><td>${serv?'Serviço':'Produto'}</td><td>${escapeHtml(serv?(v.descricaoServico||'Serviço'):v.material||'-')}</td><td>${escapeHtml(serv?'Serviços':(v.categoria||matCad.categoria||'-'))}</td><td>${serv?'-':num(v.quantidade)+' '+escapeHtml(v.unidade||matCad.unidade||'kg')}</td><td>${serv?'-':moeda(v.precoUnit)}</td><td>${moeda(v.total)}</td><td>${escapeHtml(v.comprador||'-')}</td><td>${escapeHtml(v.observacoes||'-')}</td></tr>`}).join('');
+ const periodo=d.mes?`${mesNome(Number(d.mes))}/${d.ano||anoAtual()}`:`Ano de ${d.ano||anoAtual()}`,filtros=[d.tipo&&`Tipo: ${d.tipo==='servico'?'Serviços':'Produtos'}`,d.categoria&&`Categoria: ${d.categoria}`,d.material&&`Material: ${d.material}`].filter(Boolean).join(' • ')||'Todas as vendas e receitas',endereco=coop.endereco||[coop.municipio,coop.uf].filter(Boolean).join(' / '),contato=[coop.telefone,coop.email].filter(Boolean).join(' • '),logo=document.querySelector('.acesso-marca img')?.src||document.querySelector('.sigres-logo')?.src||'',emissao=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+ const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Vendas e Receitas</title><style>*{box-sizing:border-box}body{font-family:Segoe UI,Arial;color:#263238;margin:0;background:#edf2f6}.acoes,.doc{max-width:1060px;margin:12px auto}.acoes{text-align:right}.acoes button{background:#1f4e79;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:800}.doc{background:#fff}.topo{background:#1f4e79;color:#fff;border-bottom:6px solid #d4af37;padding:17px 22px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center}.marca{display:flex;align-items:center;gap:14px}.marca img{width:66px;height:66px;object-fit:contain}.topo h1{margin:0 0 5px;font-size:22px}.org{text-align:right;font-size:10px;line-height:1.45}.corpo{padding:20px}.ident{border-left:5px solid #d4af37;background:#fff8e5;padding:9px 12px;margin-bottom:14px;font-size:11px}.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:14px}.card{border:1px solid #dce5ec;padding:8px;text-align:center}.card small{display:block;color:#60717d;font-size:9px}.card strong{font-size:14px;color:#1f4e79}.duas{display:grid;grid-template-columns:1.25fr .75fr;gap:12px;align-items:start}h2{font-size:13px;color:#1f4e79;border-bottom:2px solid #d4af37;padding-bottom:4px;margin:13px 0 6px}table{width:100%;border-collapse:collapse;margin-bottom:12px}th{background:#1f4e79;color:#fff}th,td{border:1px solid #dce5ec;padding:5px;text-align:center;font-size:8.5px}td:nth-child(3),td:last-child{text-align:left}.rodape{text-align:center;border-top:2px solid #d4af37;padding-top:7px;color:#60717d;font-size:8px}@page{size:A4 landscape;margin:9mm}@media print{body{background:#fff}.acoes{display:none}.doc{margin:0;max-width:none}.topo,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}.corpo{padding:5mm}}</style></head><body><div class="acoes"><button onclick="window.print()">🖨️ Imprimir / Salvar em PDF</button></div><main class="doc"><header class="topo"><div class="marca">${logo?`<img src="${logo}" alt="SIGRES">`:''}<div><h1>Relatório de Vendas e Receitas</h1><div>SIGRES — Solução Integrada de Gestão de Resíduos Sólidos</div></div></div><div class="org"><strong>${escapeHtml(coop.nome||coop.nomeFantasia||'Cooperativa/Associação')}</strong>${coop.cnpj?`<br>CNPJ: ${escapeHtml(coop.cnpj)}`:''}${endereco?`<br>${escapeHtml(endereco)}`:''}${contato?`<br>${escapeHtml(contato)}`:''}</div></header><div class="corpo"><div class="ident"><strong>Período:</strong> ${escapeHtml(periodo)}<br><strong>Filtros:</strong> ${escapeHtml(filtros)}<br><strong>Regra:</strong> registros cancelados não integram este relatório.</div><div class="cards"><div class="card"><small>Receita total</small><strong>${moeda(receitaTotal)}</strong></div><div class="card"><small>Venda de produtos</small><strong>${moeda(receitaProdutos)}</strong></div><div class="card"><small>Receita de serviços</small><strong>${moeda(receitaServicos)}</strong></div><div class="card"><small>Material vendido</small><strong>${num(qtd)} kg</strong></div><div class="card"><small>Preço médio dos produtos</small><strong>${moeda(qtd?receitaProdutos/qtd:0)}/kg</strong></div></div><div class="duas"><div><h2>Resumo por produto ou serviço</h2><table><tr><th>Produto/serviço</th><th>Registros</th><th>Quantidade</th><th>Receita</th><th>Participação</th></tr>${resumoItens}</table></div><div><h2>Resumo por cliente/comprador</h2><table><tr><th>Cliente/comprador</th><th>Receita</th><th>Participação</th></tr>${resumoClientes}</table></div></div><h2>Detalhamento das vendas e receitas</h2><table><tr><th>Data</th><th>Tipo</th><th>Produto/serviço</th><th>Categoria</th><th>Quantidade</th><th>Preço unit.</th><th>Total</th><th>Cliente/comprador</th><th>Observações</th></tr>${detalhes}</table><div class="rodape">${escapeHtml(coop.nome||coop.nomeFantasia||'SIGRES')} • Relatório emitido em ${escapeHtml(emissao)}</div></div></main></body></html>`;
+ const w=window.open('','_blank','width=1150,height=820');if(!w)return alert('Autorize pop-ups para imprimir o relatório.');w.document.open();w.document.write(html);w.document.close();
+};
+})();
+</script>
+<!-- ===== SIGRES Etapa 5.3 - Relatório padronizado de Despesas ===== -->
+<script>
+(function(){
+const renderDespesasBaseEtapa53=renderDespesas;
+renderDespesas=function(){
+ renderDespesasBaseEtapa53();
+ const filtrar=document.getElementById('btnDespFiltro');
+ if(filtrar&&!document.getElementById('btnRelatorioDespesasEtapa53')){
+  filtrar.insertAdjacentHTML('afterend','<button id="btnRelatorioDespesasEtapa53" class="warning">📄 Imprimir / PDF</button>');
+  document.getElementById('btnRelatorioDespesasEtapa53').onclick=imprimirRelatorioDespesasEtapa53;
+ }
+};
+function dadosRelatorioDespesasEtapa53(){
+ const mes=document.getElementById('fDespMes')?.value||'',ano=document.getElementById('fDespAno')?.value||'',status=document.getElementById('fDespStatus')?.value||'',categoria=document.getElementById('fDespCategoria')?.value||'';
+ const lista=(db.despesas||[]).filter(d=>{const st=calcularStatusDespesa(d),dataBase=d.situacao==='Pago'&&d.dataPagamento?d.dataPagamento:(d.dataVencimento||d.dataLancamento||d.data);return despesaEstaAtiva(d)&&mesmoMesAno(dataBase,mes,ano)&&(!status||st===status)&&(!categoria||d.categoriaDesp===categoria)}).sort((a,b)=>String(a.dataVencimento||a.data||'').localeCompare(String(b.dataVencimento||b.data||''))||(Number(a.id)||0)-(Number(b.id)||0));
+ return {mes,ano,status,categoria,lista};
+}
+window.imprimirRelatorioDespesasEtapa53=function(){
+ const d=dadosRelatorioDespesasEtapa53();if(!d.lista.length)return alert(d.status==='Cancelada'?'O relatório gerencial não inclui despesas canceladas. Selecione outro status.':'Não há despesas ativas para imprimir com os filtros selecionados.');
+ const coop=db.cooperativa||{},total=d.lista.reduce((s,x)=>s+(Number(x.valor)||0),0),pagas=d.lista.filter(x=>calcularStatusDespesa(x)==='Pago'),abertas=d.lista.filter(x=>calcularStatusDespesa(x)==='A Vencer'),vencidas=d.lista.filter(x=>calcularStatusDespesa(x)==='Vencido'),valorPago=pagas.reduce((s,x)=>s+(Number(x.valor)||0),0),valorAberto=abertas.reduce((s,x)=>s+(Number(x.valor)||0),0),valorVencido=vencidas.reduce((s,x)=>s+(Number(x.valor)||0),0),mapCategorias={},mapFornecedores={};
+ d.lista.forEach(x=>{const cat=x.categoriaDesp||'Não informada',forn=String(x.fornecedor||'Não informado').trim()||'Não informado';if(!mapCategorias[cat])mapCategorias[cat]={valor:0,registros:0};mapCategorias[cat].valor+=Number(x.valor)||0;mapCategorias[cat].registros++;mapFornecedores[forn]=(mapFornecedores[forn]||0)+(Number(x.valor)||0)});
+ const resumoCategorias=Object.entries(mapCategorias).sort((a,b)=>b[1].valor-a[1].valor).map(([nome,x])=>`<tr><td>${escapeHtml(nome)}</td><td>${x.registros}</td><td>${moeda(x.valor)}</td><td>${num(total?x.valor/total*100:0,1)}%</td></tr>`).join('');
+ const resumoFornecedores=Object.entries(mapFornecedores).sort((a,b)=>b[1]-a[1]).map(([nome,valor])=>`<tr><td>${escapeHtml(nome)}</td><td>${moeda(valor)}</td><td>${num(total?valor/total*100:0,1)}%</td></tr>`).join('');
+ const detalhes=d.lista.map(x=>`<tr><td>${formatarDataBR(x.dataVencimento||x.data)}</td><td>${formatarDataBR(x.dataPagamento)||'-'}</td><td>${escapeHtml(x.tipo||'-')}</td><td>${escapeHtml(x.fornecedor||'-')}</td><td>${escapeHtml(x.categoriaDesp||'-')}</td><td>${moeda(x.valor)}</td><td>${escapeHtml(x.pagamento||'-')}</td><td>${escapeHtml(x.documento||'-')}</td><td>${escapeHtml(calcularStatusDespesa(x))}</td><td>${escapeHtml(x.obs||'-')}</td></tr>`).join('');
+ const periodo=d.mes?`${mesNome(Number(d.mes))}/${d.ano||anoAtual()}`:`Ano de ${d.ano||anoAtual()}`,filtros=[d.status&&`Status: ${d.status}`,d.categoria&&`Categoria: ${d.categoria}`].filter(Boolean).join(' • ')||'Todas as despesas ativas',endereco=coop.endereco||[coop.municipio,coop.uf].filter(Boolean).join(' / '),contato=[coop.telefone,coop.email].filter(Boolean).join(' • '),logo=document.querySelector('.acesso-marca img')?.src||document.querySelector('.sigres-logo')?.src||'',emissao=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+ const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Despesas</title><style>*{box-sizing:border-box}body{font-family:Segoe UI,Arial;color:#263238;margin:0;background:#edf2f6}.acoes,.doc{max-width:1060px;margin:12px auto}.acoes{text-align:right}.acoes button{background:#1f4e79;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:800}.doc{background:#fff}.topo{background:#1f4e79;color:#fff;border-bottom:6px solid #d4af37;padding:17px 22px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center}.marca{display:flex;align-items:center;gap:14px}.marca img{width:66px;height:66px;object-fit:contain}.topo h1{margin:0 0 5px;font-size:22px}.org{text-align:right;font-size:10px;line-height:1.45}.corpo{padding:20px}.ident{border-left:5px solid #d4af37;background:#fff8e5;padding:9px 12px;margin-bottom:14px;font-size:11px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}.card{border:1px solid #dce5ec;padding:8px;text-align:center}.card small{display:block;color:#60717d;font-size:9px}.card strong{font-size:14px;color:#1f4e79}.duas{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}h2{font-size:13px;color:#1f4e79;border-bottom:2px solid #d4af37;padding-bottom:4px;margin:13px 0 6px}table{width:100%;border-collapse:collapse;margin-bottom:12px}th{background:#1f4e79;color:#fff}th,td{border:1px solid #dce5ec;padding:5px;text-align:center;font-size:8.3px}td:nth-child(3),td:nth-child(4),td:last-child{text-align:left}.rodape{text-align:center;border-top:2px solid #d4af37;padding-top:7px;color:#60717d;font-size:8px}@page{size:A4 landscape;margin:9mm}@media print{body{background:#fff}.acoes{display:none}.doc{margin:0;max-width:none}.topo,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}.corpo{padding:5mm}}</style></head><body><div class="acoes"><button onclick="window.print()">🖨️ Imprimir / Salvar em PDF</button></div><main class="doc"><header class="topo"><div class="marca">${logo?`<img src="${logo}" alt="SIGRES">`:''}<div><h1>Relatório de Despesas</h1><div>SIGRES — Solução Integrada de Gestão de Resíduos Sólidos</div></div></div><div class="org"><strong>${escapeHtml(coop.nome||coop.nomeFantasia||'Cooperativa/Associação')}</strong>${coop.cnpj?`<br>CNPJ: ${escapeHtml(coop.cnpj)}`:''}${endereco?`<br>${escapeHtml(endereco)}`:''}${contato?`<br>${escapeHtml(contato)}`:''}</div></header><div class="corpo"><div class="ident"><strong>Período:</strong> ${escapeHtml(periodo)}<br><strong>Filtros:</strong> ${escapeHtml(filtros)}<br><strong>Regra:</strong> despesas canceladas são preservadas para auditoria, mas não integram este relatório. Para despesas pagas, o período considera a data do pagamento; para as demais, o vencimento.</div><div class="cards"><div class="card"><small>Total das despesas</small><strong>${moeda(total)}</strong></div><div class="card"><small>Pago</small><strong>${moeda(valorPago)}</strong></div><div class="card"><small>Em aberto</small><strong>${moeda(valorAberto)}</strong></div><div class="card"><small>Vencido</small><strong>${moeda(valorVencido)}</strong></div></div><div class="duas"><div><h2>Resumo por categoria</h2><table><tr><th>Categoria</th><th>Registros</th><th>Valor</th><th>Participação</th></tr>${resumoCategorias}</table></div><div><h2>Resumo por fornecedor/credor</h2><table><tr><th>Fornecedor/credor</th><th>Valor</th><th>Participação</th></tr>${resumoFornecedores}</table></div></div><h2>Detalhamento das despesas</h2><table><tr><th>Vencimento</th><th>Pagamento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th><th>Forma</th><th>Documento</th><th>Status</th><th>Observações</th></tr>${detalhes}</table><div class="rodape">${escapeHtml(coop.nome||coop.nomeFantasia||'SIGRES')} • Relatório emitido em ${escapeHtml(emissao)}</div></div></main></body></html>`;
+ const w=window.open('','_blank','width=1150,height=820');if(!w)return alert('Autorize pop-ups para imprimir o relatório.');w.document.open();w.document.write(html);w.document.close();
+};
+})();
+</script>
+<!-- ===== SIGRES Etapa 6 - Identidade visual padronizada dos documentos ===== -->
+<style id="sigresEtapa6MarcaDocumentosStyle">
+.sigres-marca-doc-etapa6{width:66px;height:66px;object-fit:contain;display:block;flex:0 0 66px}
+.report-cover.sigres-doc-padronizado-etapa6,.guide-cover.sigres-doc-padronizado-etapa6{position:relative}
+.report-cover.sigres-doc-padronizado-etapa6>.sigres-marca-doc-etapa6,.guide-cover.sigres-doc-padronizado-etapa6>.sigres-marca-doc-etapa6{position:absolute;left:24px;top:23px;z-index:2}
+.report-cover.sigres-doc-padronizado-etapa6>div,.guide-cover.sigres-doc-padronizado-etapa6>.guide-cover-grid{padding-left:82px}
+@media print{.sigres-marca-doc-etapa6{width:18mm!important;height:18mm!important}.report-cover.sigres-doc-padronizado-etapa6>.sigres-marca-doc-etapa6,.guide-cover.sigres-doc-padronizado-etapa6>.sigres-marca-doc-etapa6{left:6mm;top:6mm}.report-cover.sigres-doc-padronizado-etapa6>div,.guide-cover.sigres-doc-padronizado-etapa6>.guide-cover-grid{padding-left:23mm!important}}
+</style>
+<script>
+(function(){
+function logoSigresOficialEtapa6(){return document.querySelector('.sigres-logo')?.src||''}
+function executarComLogoOficialEtapa6(fn,ctx,args){
+ const imgAcesso=document.querySelector('.acesso-marca img'),oficial=logoSigresOficialEtapa6();if(!imgAcesso||!oficial)return fn.apply(ctx,args);
+ const anterior=imgAcesso.src;imgAcesso.src=oficial;try{return fn.apply(ctx,args)}finally{imgAcesso.src=anterior}
+}
+function envolverComLogoOficialEtapa6(nome){const original=window[nome];if(typeof original!=='function'||original.__sigresEtapa6)return;const novo=function(...args){return executarComLogoOficialEtapa6(original,this,args)};novo.__sigresEtapa6=true;window[nome]=novo}
+['abrirDemonstrativoRemuneracao','abrirRegistroEpiPDFV148','imprimirRelatorioProducaoEtapa51','imprimirRelatorioVendasEtapa52','imprimirRelatorioDespesasEtapa53'].forEach(envolverComLogoOficialEtapa6);
+
+/* Relatório individual de compras: acrescenta o S sem alterar a versão térmica. */
+const imprimirRelatorioComprasBaseEtapa6=window.imprimirRelatorioComprasV170;
+if(typeof imprimirRelatorioComprasBaseEtapa6==='function')window.imprimirRelatorioComprasV170=function(...args){
+ const oficial=logoSigresOficialEtapa6(),abrir=window.open;if(!oficial)return imprimirRelatorioComprasBaseEtapa6.apply(this,args);
+ window.open=function(...a){const w=abrir.apply(window,a);if(!w)return w;const escrever=w.document.write.bind(w.document);w.document.write=function(html){let ajustado=String(html).replace('</style>','.marca-sigres{display:flex;align-items:center;gap:13px}.marca-sigres img{width:66px;height:66px;object-fit:contain}.topo{display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:16px}.topo>.org-relatorio{text-align:right}</style>').replace('<header class="topo"><h1>Relatório de Compras por Catador/Fornecedor</h1><strong>','<header class="topo"><div class="marca-sigres"><img src="'+oficial+'" alt="SIGRES"><div><h1>Relatório de Compras por Catador/Fornecedor</h1></div></div><div class="org-relatorio"><strong>').replace('</strong><div>','</strong><div>').replace('</div></header><div class="corpo">','</div></div></header><div class="corpo">');return escrever(ajustado)};return w};
+ try{return imprimirRelatorioComprasBaseEtapa6.apply(this,args)}finally{window.open=abrir}
+};
+
+/* Relatório Executivo: inclui a marca oficial no cabeçalho impresso. */
+const montarRelatorioExecutivoBaseEtapa6=window.montarRelatorioExecutivo;
+if(typeof montarRelatorioExecutivoBaseEtapa6==='function')window.montarRelatorioExecutivo=function(...args){const html=montarRelatorioExecutivoBaseEtapa6.apply(this,args),logo=logoSigresOficialEtapa6();return logo?html.replace('<div class="report-cover">','<div class="report-cover sigres-doc-padronizado-etapa6"><img class="sigres-marca-doc-etapa6" src="'+logo+'" alt="SIGRES">'):html};
+
+/* Guia: a marca também aparece na visualização e na exportação em PDF. */
+const renderGuiaUtilizacaoBaseEtapa6=window.renderGuiaUtilizacao;
+if(typeof renderGuiaUtilizacaoBaseEtapa6==='function')window.renderGuiaUtilizacao=function(...args){const r=renderGuiaUtilizacaoBaseEtapa6.apply(this,args),capa=document.querySelector('#guiaTopo .guide-cover'),logo=logoSigresOficialEtapa6();if(capa&&logo&&!capa.querySelector('.sigres-marca-doc-etapa6')){capa.classList.add('sigres-doc-padronizado-etapa6');capa.insertAdjacentHTML('afterbegin','<img class="sigres-marca-doc-etapa6" src="'+logo+'" alt="SIGRES">')}return r};
+
+/* Tickets térmicos: identificação textual, sem imagem. */
+function envolverTicketTextoEtapa6(nome){const original=window[nome];if(typeof original!=='function')return;window[nome]=function(...args){const abrir=window.open;window.open=function(...a){const w=abrir.apply(window,a);if(!w)return w;const escrever=w.document.write.bind(w.document);w.document.write=html=>escrever(String(html).replace('</body>','<div style="margin-top:3mm;text-align:center;font:8px Courier New,monospace">SIGRES — Controle operacional e gerencial</div></body>'));return w};try{return original.apply(this,args)}finally{window.open=abrir}}}
+['imprimirTicketRelatorioComprasV170','emitirTicketCompraV170'].forEach(envolverTicketTextoEtapa6);
+
+/* No código de recuperação impresso, troca somente durante a impressão. */
+let imagemAcessoAnteriorEtapa6='';window.addEventListener('beforeprint',()=>{const img=document.querySelector('.acesso-marca img'),logo=logoSigresOficialEtapa6();if(img&&logo){imagemAcessoAnteriorEtapa6=img.src;img.src=logo}});window.addEventListener('afterprint',()=>{const img=document.querySelector('.acesso-marca img');if(img&&imagemAcessoAnteriorEtapa6){img.src=imagemAcessoAnteriorEtapa6;imagemAcessoAnteriorEtapa6=''}});
+})();
+</script>
+<!-- ===== SIGRES Etapa 7 - Revisão completa do Guia de Utilização ===== -->
+<script>
+(function(){
+const guiaModulosBaseEtapa7=window.guiaModulos;
+if(typeof guiaModulosBaseEtapa7==='function')window.guiaModulos=function(){
+ const modulos=guiaModulosBaseEtapa7.apply(this,arguments);
+ const atualizar=(titulo,dados)=>{const modulo=modulos.find(m=>m.title===titulo);if(modulo)Object.assign(modulo,dados)};
+
+ atualizar('Produção',{
+  short:'Registro da produção e emissão de relatório por período, produto, mês e ano.',
+  passos:['Informar a data da produção.','Selecionar o material produzido.','Conferir categoria, unidade e tipo preenchidos automaticamente.','Informar a quantidade e a equipe operacional, quando aplicável.','Salvar o lançamento.','Para prestar contas ou apoiar reuniões, selecionar o período e os filtros desejados e clicar em Imprimir / PDF.'],
+  infos:['Produção total','Produção por categoria','Produção por material/produto','Tipo do material','Quantidade produzida','Produtividade por equipe','Relatório detalhado e resumo por produto'],
+  boas:['Lançar a produção diariamente.','Não misturar rejeito com materiais comercializáveis.','Conferir unidade e tipo antes de salvar.','Antes de imprimir, aplicar os filtros de período, categoria, material e tipo.','Usar o relatório mensal para reuniões e prestação de informações a organizações parceiras.']
+ });
+
+ atualizar('Compras de Materiais',{
+  short:'Compras de catadores/fornecedores, comprovantes A4, tickets térmicos e relatório individual.',
+  passos:['Cadastrar o catador ou fornecedor, caso ainda não exista.','Informar a data e a forma de pagamento.','Selecionar o primeiro material e preencher peso bruto, impurezas e preço por kg.','Utilizar Adicionar outro material quando a mesma pessoa entregar tipos diferentes.','Conferir peso líquido e valor total.','Registrar a compra.','Usar A4 / PDF para o comprovante convencional ou Ticket para a impressora térmica.','Em Relatório de Compras, escolher o período, o catador/fornecedor e, se necessário, o material.','Clicar em Atualizar e emitir o relatório em A4 / PDF ou o ticket consolidado.','Depois da triagem, lançar em Produção somente o material aproveitado e o rejeito correspondente.'],
+  infos:['Catador/Fornecedor','Materiais entregues','Peso bruto','Impurezas ou desconto','Peso líquido','Preço por kg','Valor total','Forma de pagamento','Comprovante A4 / PDF','Ticket térmico','Relatório individual por período','Resumo por material','Despesa operacional automática'],
+  perguntas:['Quanto foi comprado no período?','Quanto cada catador ou fornecedor vendeu para a cooperativa?','Qual foi o peso líquido, o valor total e o preço médio por material?','Qual formato de comprovante deve ser entregue: A4 ou ticket térmico?','A despesa foi gerada automaticamente?'],
+  boas:['Não cadastrar catador avulso como cooperado.','Registrar vários materiais da mesma entrega em uma única compra.','Conferir peso e preço antes de salvar.','Usar A4 / PDF para arquivo, envio digital ou impressão comum.','Usar Ticket somente em impressora térmica configurada.','Selecionar um catador/fornecedor antes de emitir o ticket consolidado.','Não lançar manualmente em Despesas uma compra já registrada neste módulo.','Após a triagem, registrar a produção aproveitada e o rejeito.']
+ });
+
+ atualizar('Vendas e Receitas',{
+  passos:['Selecionar o tipo de receita.','Para venda de produto/material, selecionar o item, quantidade, preço e comprador.','Para composto/substrato, registrar previamente o produto pronto em Produção.','Para serviço, informar cliente, descrição e valor.','Salvar e conferir os indicadores do período.','Para reuniões ou prestação de contas, aplicar os filtros e clicar em Imprimir / PDF.'],
+  infos:['Receita total','Venda de produtos/materiais','Receita de serviços','Quantidade vendida','Preço médio dos produtos','Comprador/Cliente','Movimentação de estoque','Relatório de vendas por período'],
+  boas:['Serviços geram receita sem baixa de estoque.','Composto/substrato segue o fluxo Produção → Estoque → Venda.','Padronizar compradores e clientes para melhorar os relatórios.','Conferir os filtros e os totais antes de imprimir ou salvar em PDF.']
+ });
+
+ atualizar('Despesas',{
+  passos:['Registrar manualmente somente as despesas que não foram geradas por outro módulo.','Informar categoria, fornecedor, vencimento e valor.','Atualizar a situação do pagamento.','Conferir as despesas automáticas geradas por Retirada e Compras de Materiais.','Não repetir manualmente o mesmo lançamento.','Para reuniões ou prestação de contas, aplicar os filtros e clicar em Imprimir / PDF.'],
+  infos:['Despesas pagas','Despesas vencidas','Despesas a vencer','Categoria','Fornecedor','Forma de pagamento','Despesas automáticas','Relatório de despesas por período'],
+  boas:['Registrar despesas com regularidade.','Conferir vencimentos e pagamentos.','Não duplicar despesas automáticas das retiradas ou das compras.','Manter categorias e fornecedores padronizados.','Revisar filtros, situação e totais antes de imprimir o relatório.']
+ });
+
+ atualizar('Cooperados',{
+  short:'Cadastro completo, visualização resumida e impressão da ficha cadastral.',
+  finalidade:'Manter o cadastro individual dos cooperados e emitir a Ficha Cadastral do Cooperado/Associado.',
+  serve:'Centraliza os dados pessoais, sociais e operacionais. A listagem permanece resumida para facilitar a consulta; todos os dados ficam disponíveis ao visualizar, editar ou imprimir a ficha.',
+  passos:['Cadastrar ou editar o cooperado.','Preencher os dados pessoais, endereço e contato.','Selecionar o turno: Manhã, Tarde ou Integral.','Informar NIS, CadÚnico, Bolsa Família, outros benefícios, contribuição ao INSS, escolaridade e estado civil.','Definir função, situação e retirada de referência, quando aplicável.','Salvar e conferir o resumo na listagem.','Usar Visualizar para consultar todos os dados.','Clicar em Imprimir ficha para abrir a ficha completa e escolher Imprimir / Salvar em PDF.'],
+  infos:['Dados pessoais e documentos','NIS e CadÚnico','Benefícios governamentais','Contribuinte do INSS','Escolaridade e estado civil','Função e turno','Situação operacional','Ficha completa com identificação da cooperativa','Cidade, data e assinatura'],
+  perguntas:['Os dados pessoais e sociais estão completos?','O turno foi selecionado corretamente?','A ficha apresenta os dados da cooperativa?','O nome do cooperado aparece abaixo da linha de assinatura?','O cooperado está ativo para os controles mensais?'],
+  boas:['Evitar cadastros duplicados.','Usar as opções da lista de turno para manter a padronização.','Manter benefícios e dados sociais atualizados.','Revisar a ficha antes de imprimir ou salvar em PDF.','Não é necessário incluir fotografia.']
+ });
+
+ atualizar('Pessoas',{
+  short:'Frequência mensal preenchida como presença, com registro das exceções por turno.',
+  finalidade:'Controlar a frequência mensal de forma simplificada, registrando principalmente as faltas e ausências.',
+  serve:'Ao abrir uma competência, os cooperados ativos aparecem como presentes. O responsável altera somente os dias com falta integral, falta pela manhã, falta pela tarde ou ausência justificada. O fechamento libera a competência para o cálculo da retirada.',
+  passos:['Selecionar o mês e o ano.','Conferir os cooperados ativos, que aparecem inicialmente como presentes.','Alterar somente os dias em que ocorreu falta ou ausência justificada.','Quando a falta for parcial, indicar Manhã ou Tarde; quando abranger o dia, indicar Integral.','Informar o motivo quando solicitado.','Conferir faltas descontáveis e ausências justificadas.','No final do mês, clicar em Fechar frequência.','Reabrir somente quando houver necessidade de correção.'],
+  infos:['Presenças automáticas','Falta integral','Falta no turno da manhã','Falta no turno da tarde','Ausências justificadas','Faltas descontáveis','Status da competência','Integração com Retirada'],
+  perguntas:['Todos os cooperados ativos aparecem na competência?','As faltas parciais foram lançadas no turno correto?','As ausências justificadas estão classificadas corretamente?','A frequência foi conferida e fechada antes da retirada?'],
+  boas:['Registrar as exceções ao longo do mês.','Não alterar as presenças que já estão corretas.','Não utilizar Falta para situações justificadas.','Conferir os totais antes do fechamento.','Fechar a frequência somente no final da competência, após a revisão.']
+ });
+ return modulos;
+};
+
+const renderGuiaBaseEtapa7=window.renderGuiaUtilizacao;
+if(typeof renderGuiaBaseEtapa7==='function')window.renderGuiaUtilizacao=function(){
+ const retorno=renderGuiaBaseEtapa7.apply(this,arguments);
+ const destaque=document.querySelector('.guide-highlight[data-guide-text^="atualizações recentes"]');
+ if(destaque)destaque.innerHTML='<strong>🆕 Guia de utilização revisado:</strong> consulte os fluxos atuais de cadastro e impressão da ficha do cooperado, frequência por exceção e turno, compras com A4/PDF e ticket térmico, relatórios operacionais e salvamento em PDF.';
+ const faq=document.getElementById('guiaFAQ');
+ if(faq&&!document.getElementById('guiaImpressoesEtapa7')){
+  faq.insertAdjacentHTML('beforebegin',`<div id="guiaImpressoesEtapa7" class="card-panel guide-section" data-guide-text="impressão imprimir salvar pdf a4 ticket térmico relatório produção vendas despesas compras ficha cooperado">
+   <h3>🖨️ Impressões, relatórios e PDF</h3>
+   <div class="guide-info-grid">
+    <div class="guide-info-box"><div class="guide-info-title">📄 A4 / PDF</div><p>Use esta opção para documentos completos, arquivo digital, envio por e-mail ou impressão em papel comum. Na janela aberta, escolha <strong>Imprimir / Salvar em PDF</strong>.</p></div>
+    <div class="guide-info-box gold"><div class="guide-info-title">🧾 Ticket térmico</div><p>No módulo Compras, use <strong>Ticket</strong> para emitir o comprovante compacto. Antes de imprimir, selecione a impressora térmica e confirme o tamanho do papel configurado no equipamento.</p></div>
+    <div class="guide-info-box green"><div class="guide-info-title">📊 Relatórios filtrados</div><p>Produção, Compras, Vendas e Despesas possuem relatórios para reuniões e prestação de contas. Primeiro aplique período e demais filtros; depois confira os totais e imprima ou salve em PDF.</p></div>
+   </div><div class="guide-highlight"><strong>Dica:</strong> se o navegador acrescentar endereço, data ou número da página, desative a opção <em>Cabeçalhos e rodapés</em> na tela de impressão.</div>
+   <button class="guide-back no-print" onclick="guiaVoltarTopo()">⬆️ Voltar ao Topo</button>
+  </div>`);
+  const grade=faq.querySelector('.guide-info-grid');
+  if(grade)grade.insertAdjacentHTML('beforeend',`
+   <div class="guide-info-box"><div class="guide-info-title">Como escolher entre A4 e Ticket em Compras?</div><p>Use <strong>A4 / PDF</strong> para um documento completo ou arquivo digital. Use <strong>Ticket</strong> para entregar um comprovante compacto impresso na impressora térmica. Os dois formatos permanecem disponíveis.</p></div>
+   <div class="guide-info-box"><div class="guide-info-title">Como saber quanto um fornecedor vendeu no período?</div><p>Em Compras, abra o Relatório de Compras, selecione as datas e o catador/fornecedor, aplique o filtro e consulte o resumo. Depois, emita em A4/PDF ou como ticket consolidado.</p></div>
+   <div class="guide-info-box"><div class="guide-info-title">Preciso marcar todas as presenças diariamente?</div><p>Não. Ao abrir o mês, os cooperados ativos aparecem como presentes. Altere somente as faltas integrais, faltas por turno ou ausências justificadas e feche a frequência ao final do mês.</p></div>
+   <div class="guide-info-box"><div class="guide-info-title">Como visualizar a senha digitada?</div><p>Nos campos de senha, clique no ícone do olho para visualizar temporariamente o conteúdo. Clique novamente para ocultar antes de continuar.</p></div>`);
+ }
+ if(typeof inicializarInteracoesGuia==='function')inicializarInteracoesGuia();
+ return retorno;
+};
+})();
+</script>
+<!-- ===== SIGRES Etapa 8 - Tipo da organização no card de identificação ===== -->
+<script>
+(function(){
+function tipoOrganizacaoEtapa8(c){
+ const salvo=String(c?.tipoOrganizacao||'').trim().toLowerCase();
+ if(salvo==='associação'||salvo==='associacao')return 'Associação';
+ if(salvo==='cooperativa')return 'Cooperativa';
+ const nome=String(c?.nome||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ return /\bassoc(iacao|\.)\b/.test(nome)?'Associação':'Cooperativa';
+}
+
+/* O card mostra o tipo correto na linha superior e apenas o nome fantasia abaixo. */
+window.atualizarNomeCooperativaTopo=function(){
+ const badge=document.getElementById('coopHeaderBadge'),nomeEl=document.getElementById('coopHeaderNome');
+ if(!badge||!nomeEl)return;
+ const c=db?.cooperativa||{},nomeFantasia=String(c.nomeFantasia||'').trim(),tipo=tipoOrganizacaoEtapa8(c);
+ const rotulo=badge.querySelector('.coop-badge-small');
+ if(rotulo)rotulo.textContent=tipo.toUpperCase();
+ if(nomeFantasia){
+  nomeEl.textContent=nomeFantasia;
+  badge.title=tipo+' '+nomeFantasia;
+  badge.classList.remove('is-empty');
+ }else{
+  nomeEl.textContent='';badge.removeAttribute('title');badge.classList.add('is-empty');
+ }
+};
+
+/* Inclui o tipo da organização na visualização e na edição dos dados institucionais. */
+const blocoCooperativaBaseEtapa8=window.blocoCooperativaV265A7;
+if(typeof blocoCooperativaBaseEtapa8==='function')window.blocoCooperativaV265A7=function(){
+ const c=db?.cooperativa||{},tipo=tipoOrganizacaoEtapa8(c);
+ let html=blocoCooperativaBaseEtapa8.apply(this,arguments);
+ if(html.includes('class="grid-3"')){
+  html=html.replace('<div class="grid-3">','<div class="grid-3"><div class="metric-box"><div class="metric-label">Tipo da organização</div><div class="metric-value">'+escapeHtml(tipo)+'</div></div>');
+ }else if(html.includes('class="form-grid"')){
+  const campo='<div class="field"><label for="cadCoopTipoOrganizacao">Tipo da organização</label><select id="cadCoopTipoOrganizacao"><option value="Associação" '+(tipo==='Associação'?'selected':'')+'>Associação</option><option value="Cooperativa" '+(tipo==='Cooperativa'?'selected':'')+'>Cooperativa</option></select></div>';
+  html=html.replace('<div class="form-grid">','<div class="form-grid">'+campo);
+ }
+ return html;
+};
+
+const salvarCooperativaBaseEtapa8=window.salvarCooperativaV265A7;
+if(typeof salvarCooperativaBaseEtapa8==='function')window.salvarCooperativaV265A7=function(){
+ const tipo=document.getElementById('cadCoopTipoOrganizacao')?.value||'Cooperativa';
+ const nomeDigitado=document.getElementById('cadCoopNome')?.value?.trim()||'';
+ const alteradoAntes=db?.cooperativa?.alteradoEm||'';
+ const retorno=salvarCooperativaBaseEtapa8.apply(this,arguments);
+ if(db?.cooperativa?.nome===nomeDigitado&&db.cooperativa.alteradoEm!==alteradoAntes){
+  db.cooperativa.tipoOrganizacao=tipo;
+  salvarDB();atualizarNomeCooperativaTopo();renderCadastros();
+ }
+ return retorno;
+};
+
+/* Atualiza também os textos do formulário para contemplar associações. */
+const renderCadastrosBaseEtapa8=window.renderCadastros;
+if(typeof renderCadastrosBaseEtapa8==='function')window.renderCadastros=function(){
+ const retorno=renderCadastrosBaseEtapa8.apply(this,arguments);
+ const nomeLabel=document.querySelector('label[for="cadCoopNome"]');
+ if(nomeLabel)nomeLabel.textContent='Nome completo da organização';
+ const nomeInput=document.getElementById('cadCoopNome');
+ if(nomeInput)nomeInput.placeholder='Nome completo da associação ou cooperativa';
+ return retorno;
+};
+
+atualizarNomeCooperativaTopo();
 })();
 </script>
 </body>
