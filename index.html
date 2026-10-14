@@ -958,7 +958,7 @@ async function criarBackupInterno(tipo='manual',motivo='Cópia criada pelo usuá
 }
 
 async function avaliarBackupInternoAutomatico(qtdAlteracoes){
-    const hoje=new Date().toISOString().slice(0,10);
+    const hoje=hojeISO();
     const ultimoDia=localStorage.getItem('recControlBackupInternoDia');
     if(ultimoDia!==hoje){
         localStorage.setItem('recControlBackupInternoDia',hoje);
@@ -1056,7 +1056,7 @@ function sincronizarMateriaisPadrao(){
     (db.producao||[]).forEach(ajustarRegistro);
     (db.vendas||[]).forEach(ajustarRegistro);
 }
-function moeda(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0)} function num(v,d=2){let n=Number(v)||0; if(Number.isInteger(n))return String(n).replace('.',','); return n.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:d})} function formatarDataBR(data){if(!data)return '';let d=String(data);if(/^\d{2}\/\d{2}\/\d{4}$/.test(d))return d;if(!/^\d{4}-\d{2}-\d{2}$/.test(d))return d;let [a,m,di]=d.split('-');return `${di}/${m}/${a}`} function normalizarDataISO(data){if(!data)return '';let d=String(data).trim();if(/^\d{4}-\d{2}-\d{2}$/.test(d))return d;if(/^\d{2}\/\d{2}\/\d{4}$/.test(d)){let [di,m,a]=d.split('/');return `${a}-${m}-${di}`}return d} function hojeISO(){return new Date().toISOString().slice(0,10)} function anoAtual(){return new Date().getFullYear()} function mesAtual(){return new Date().getMonth()+1} function mesNome(m){return new Date(2026,m-1,1).toLocaleString('pt-BR',{month:'long'})} function getDate(v){return v?new Date(v+"T00:00:00"):null} function mesmoMesAno(data,mes,ano){let d=getDate(data);return d&&(!mes||d.getMonth()+1===Number(mes))&&(!ano||d.getFullYear()===Number(ano))} function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function moeda(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0)} function num(v,d=2){let n=Number(v)||0; if(Number.isInteger(n))return String(n).replace('.',','); return n.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:d})} function formatarDataBR(data){if(!data)return '';let d=String(data);if(/^\d{2}\/\d{2}\/\d{4}$/.test(d))return d;if(!/^\d{4}-\d{2}-\d{2}$/.test(d))return d;let [a,m,di]=d.split('-');return `${di}/${m}/${a}`} function normalizarDataISO(data){if(!data)return '';let d=String(data).trim();if(/^\d{4}-\d{2}-\d{2}$/.test(d))return d;if(/^\d{2}\/\d{2}\/\d{4}$/.test(d)){let [di,m,a]=d.split('/');return `${a}-${m}-${di}`}return d} function hojeISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`} function anoAtual(){return new Date().getFullYear()} function mesAtual(){return new Date().getMonth()+1} function mesNome(m){return new Date(2026,m-1,1).toLocaleString('pt-BR',{month:'long'})} function getDate(v){return v?new Date(v+"T00:00:00"):null} function mesmoMesAno(data,mes,ano){let d=getDate(data);return d&&(!mes||d.getMonth()+1===Number(mes))&&(!ano||d.getFullYear()===Number(ano))} function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 
 function atualizarNomeCooperativaTopo(){
     const badge=document.getElementById('coopHeaderBadge');
@@ -1319,7 +1319,7 @@ function atualizarBackupStatusTopo(){
     el.style.color=pendente?'#b91c1c':'#1f4e79';
 }
 function avisoAberturaBackup(){
-    let hoje=new Date().toISOString().slice(0,10);
+    let hoje=hojeISO();
     if(localStorage.getItem('recControlAvisoBackupDia')===hoje)return;
     localStorage.setItem('recControlAvisoBackupDia',hoje);
     setTimeout(()=>alert('Atenção: a solução salva os dados neste computador. Faça os lançamentos normalmente. Ao fechar a página, se houver alterações, a solução exigirá um backup para evitar perda de informações.'),300);
@@ -5223,7 +5223,7 @@ function filtrarFornecedoresCompraV160(){
 }
 function opcoesFornecedoresV160(sel=''){return '<option value="">Selecione...</option>'+db.fornecedoresMateriais.filter(fornecedorAtivoV160).sort((a,b)=>String(a.apelido||a.nome).localeCompare(String(b.apelido||b.nome),'pt-BR')).map(f=>`<option value="${escV160(f.id)}" ${String(sel)===String(f.id)?'selected':''}>${f.apelido?escV160(f.apelido)+' — ':''}${escV160(f.nome)}${f.cpfCnpj?' — '+escV160(f.cpfCnpj):''}</option>`).join('')}
 function opcoesMateriaisCompraV160(sel=''){return '<option value="">Selecione...</option>'+optMateriaisAgrupados(sel)}
-function hojeV160(){return typeof hojeISO==='function'?hojeISO():new Date().toISOString().slice(0,10)}
+function hojeV160(){return hojeISO()}
 function numeroComprovanteV160(id){return 'CMP-'+String(id).slice(-8)}
 function usuarioV160(){return window.sigresNomeUsuarioAtual?.()||'Usuário não identificado'}
 function renderComprasV160(){
