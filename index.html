@@ -6078,9 +6078,15 @@ for(const name of ['pagarDespesa','reabrirDespesa','excluirDespesa']){const f=wi
 <script id="sigresAvisoAtualizacao">
 (function(){
 'use strict';
-// Em cada entrega, substituir TODOS os itens pelas mudanças atuais; não acumular novidades anteriores. Alterar também a versão.
-const release={versao:'2.0.4',itens:[
- ['Compras de Materiais','O filtro Somente editados aparece nas áreas de consulta Histórico e Relatório individual, junto aos demais filtros. Foi removida sua exibição fora de contexto no rodapé da Nova compra.']
+// Manter todo o conjunto da atualização atual, inclusive após correções pontuais. Substituir a lista ao iniciar uma nova atualização de funcionalidades; não acumular ciclos anteriores. Alterar também a versão.
+const release={versao:'2.0.5',itens:[
+ ['Compras integradas à Produção e ao Estoque','Compras novas de material já triado geram entrada automática pelo peso líquido. Cancelamentos revertem a entrada vinculada, com proteção contra estoque negativo. Compras antigas ficam preservadas.'],
+ ['Busca no Histórico de Compras','Localize compras por nome, apelido, documento, número do comprovante ou material, ignorando acentos.'],
+ ['Tickets de compras padronizados','O ticket da compra e o ticket consolidado do Relatório individual apresentam Emitido em, responsável e o nome do catador/fornecedor abaixo da linha para assinatura.'],
+ ['Frequência com nomes alinhados','Nomes fixos à esquerda, rolagem vertical sincronizada com os registros e barras horizontais no topo e na base das datas.'],
+ ['Estoque de EPI','Registro de entradas e saldo inicial físico, baixa automática nas entregas, devolução de saldo ao cancelar e bloqueio de saldo insuficiente. Entregas antigas permanecem no histórico sem baixa retroativa.'],
+ ['Guia de Utilização atualizado','Passo a passo das novas funcionalidades, exemplos e perguntas frequentes, incluindo uma seção específica para estoque e entrega de EPI.'],
+ ['Filtro Somente editados','Corrigida a exibição fora de contexto no rodapé da Nova compra. O filtro permanece junto aos demais filtros nas áreas de consulta Histórico e Relatório individual.']
 ]};
 let anterior=null;const vistas=new Set();
 function chave(){const u=window.SIGRES_USUARIO_ATUAL;return u?.id?'sigresNovidadesLidas:'+u.id:null}
@@ -6449,7 +6455,7 @@ guiaModulos=function(){
 const render=renderGuiaUtilizacao;
 renderGuiaUtilizacao=function(){
  const r=render.apply(this,arguments);
- const capa=document.querySelector('#guiaTopo .guide-cover-box');if(capa)capa.innerHTML=capa.innerHTML.replace(/Versão [^<]+<br>/,'Versão 2.0.4<br>');
+ const capa=document.querySelector('#guiaTopo .guide-cover-box');if(capa)capa.innerHTML=capa.innerHTML.replace(/Versão [^<]+<br>/,'Versão 2.0.5<br>');
  const destaque=document.querySelector('.guide-highlight[data-guide-text^="atualizações recentes"]');
  if(destaque){destaque.textContent='Guia atualizado: compras já triadas com entrada automática em Produção e Estoque; busca no Histórico; tickets com emissão, responsável e assinatura; frequência com rolagem vertical sincronizada; entradas, saldo e entregas de EPI. Consulte o passo a passo nas seções de cada módulo.';destaque.dataset.guideText+=' compras triado entrada automática estoque epi saldo inicial ticket assinatura rolagem sincronizada';}
  const grade=document.querySelector('#guiaFAQ .guide-info-grid');
