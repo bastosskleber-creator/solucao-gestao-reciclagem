@@ -833,6 +833,18 @@ body.sigres-bloqueado>.app-header,body.sigres-bloqueado>.app-container{filter:bl
 @media(max-width:650px){#sigresDetalheEvento > .compra-modal-box{padding:1rem}.evento-participantes-sigres{max-height:46vh}}
 </style>
 <style>.despesa-data-pagamento{display:block;margin-top:4px;font-size:.72rem;line-height:1.3;color:#667783;font-weight:400;white-space:nowrap}</style>
+<style>
+.venda-dados-comprador { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1rem; }
+.venda-dados-comprador .comprador-linha { grid-template-columns: minmax(0, 1fr) auto; }
+.venda-dados-comprador .comprador-linha input { min-width: 0; width: 100%; }
+@media (max-width: 650px) {
+  .venda-dados-comprador { grid-template-columns: minmax(0, 1fr); }
+}
+#vendaItensProduto[hidden], #vendaCancelarMaterial[hidden] { display: none; }
+#vendaItensProduto .table-wrap table { min-width: 0; }
+#vendaItensProduto tbody td:first-child { overflow-wrap: anywhere; }
+#vendaItensProduto tbody td:last-child button { margin: 2px; }
+</style>
 </head>
 <body class="sigres-bloqueado">
 <div id="acessoOverlay" class="acesso-overlay ativo" role="dialog" aria-modal="true" aria-labelledby="acessoTitulo"><section class="acesso-card"><div class="acesso-topo"><div class="acesso-marca"><img src="data:image/png;base64,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" alt="SIGRES — Solução Integrada de Gestão de Resíduos Sólidos"></div></div><div id="acessoConteudo" class="acesso-corpo"></div></section></div>
@@ -2847,7 +2859,8 @@ function cancelarRegistro(modulo,id,callback){
     const reg=lista.find(x=>String(x.id)===String(id));
     if(!reg)return alert('Registro não encontrado.');
     if(registroCancelado(reg))return alert('Este registro já está cancelado.');
-    const resumo=resumoCancelamento(modulo,reg);
+    const agruparVenda = modulo === 'vendas' && reg.vendaGrupoId;
+    const resumo = agruparVenda ? `Venda nº ${reg.vendaGrupoId} de ${reg.comprador}` : resumoCancelamento(modulo,reg);
     let responsavel=prompt(`${resumo}\n\nInforme quem está cancelando este registro:`);
     if(responsavel===null)return;
     responsavel=String(responsavel).trim();
@@ -2857,6 +2870,17 @@ function cancelarRegistro(modulo,id,callback){
     motivo=String(motivo).trim();
     if(!motivo)return alert('Informe o motivo do cancelamento.');
     if(!confirm(`${resumo}\n\nConfirmar cancelamento?\n\nResponsável: ${responsavel}\nMotivo: ${motivo}\n\nO registro continuará salvo para auditoria.`))return;
+    if (agruparVenda) {
+        const canceladoEm = agoraISO();
+        const atualizados = lista.map(item => item.vendaGrupoId === reg.vendaGrupoId ? {
+            ...item, statusRegistro:'CANCELADO', canceladoEm, canceladoPor:responsavel,
+            motivoCancelamento:motivo, alteradoEm:canceladoEm, versaoRegistro:VERSAO_REGISTRO_AUDITORIA
+        } : item);
+        if (gravarVendaCompleta(atualizados)) {
+            if (typeof callback === 'function') callback(); else renderAtual();
+        }
+        return;
+    }
     prepararAuditoriaRegistro(reg);
     reg.statusRegistro='CANCELADO';
     reg.canceladoEm=agoraISO();
@@ -4120,7 +4144,12 @@ function cadastrarCompradorRapido(){
     const resultado=validarDuplicidadeComprador({nome:limpo,documento:''},null,true); if(!resultado)return;
     const item={id:Date.now(),nome:limpo,documento:'',cidade:'',uf:'',telefone:'',statusOperacional:'ATIVO'};
     db.compradores.push(item); salvarDB();
-    if(currentView==='vendas'){renderVendas();setTimeout(()=>{const el=document.getElementById('vendaComprador');if(el)el.value=item.nome},0)} else renderCadastros();
+    if(currentView==='vendas'){
+        const campo = document.getElementById('vendaComprador');
+        const lista = document.getElementById('listaCompradoresVenda');
+        if (lista) { const opcao = document.createElement('option'); opcao.value = item.nome; lista.appendChild(opcao); }
+        if (campo) campo.value = item.nome;
+    } else renderCadastros();
     if(typeof mostrarToast==='function')mostrarToast('Comprador cadastrado e disponibilizado nas vendas.','sucesso');
 }
 function validarDuplicidadeComprador(dados,idAtual=null,rapido=false){
@@ -4163,23 +4192,6 @@ function listarCompradores(){
     const el=document.getElementById('listaCompradores');if(!el)return;
     el.innerHTML=`<div class="notice"><strong>${lista.length}</strong> comprador(es) cadastrado(s). Compradores inativos permanecem no histórico, mas não aparecem em novas vendas.</div><div class="table-wrap"><table><tr><th>Comprador</th><th>CPF/CNPJ</th><th>Município/UF</th><th>Telefone</th><th>Status</th><th>Ações</th></tr>${lista.map(c=>{const ativo=(c.statusOperacional||'ATIVO')==='ATIVO';return `<tr><td style="text-align:left"><strong>${escapeHtml(c.nome)}</strong></td><td>${escapeHtml(c.documento||'-')}</td><td>${escapeHtml([c.cidade,c.uf].filter(Boolean).join(' / ')||'-')}</td><td>${escapeHtml(c.telefone||'-')}</td><td><span class="comprador-status ${ativo?'comprador-ativo':'comprador-inativo'}">${ativo?'ATIVO':'INATIVO'}</span></td><td><button class="mini-btn info" onclick="editarComprador(${c.id})">✏️ Editar</button> ${ativo?`<button class="mini-btn warning" onclick="alterarStatusComprador(${c.id},'INATIVO')">⏸️ Inativar</button>`:`<button class="mini-btn" onclick="alterarStatusComprador(${c.id},'ATIVO')">♻️ Reativar</button>`}</td></tr>`}).join('')||'<tr><td colspan="6">Nenhum comprador cadastrado.</td></tr>'}</table></div>`;
 }
-const renderVendasV2671=renderVendas;
-renderVendas=function(){
-    garantirBaseCompradores(); renderVendasV2671();
-    const campo=document.getElementById('vendaComprador');if(!campo)return;
-    campo.setAttribute('list','listaCompradoresVenda');campo.placeholder='Digite ou selecione um comprador cadastrado';
-    const box=campo.closest('.field'); if(box){box.innerHTML=`<label for="vendaComprador">Comprador cadastrado</label><div class="comprador-linha"><input type="text" id="vendaComprador" list="listaCompradoresVenda" placeholder="Digite para pesquisar"><button type="button" id="btnNovoCompradorVenda" class="info">➕ Novo</button></div><datalist id="listaCompradoresVenda">${compradoresAtivos().map(c=>`<option value="${escapeHtml(c.nome)}"></option>`).join('')}</datalist><small class="muted">Somente compradores ativos. O botão Novo cadastra sem sair da venda.</small>`;}
-    document.getElementById('btnNovoCompradorVenda')?.addEventListener('click',cadastrarCompradorRapido);
-    if(editVendaId){const v=db.vendas.find(x=>String(x.id)===String(editVendaId));if(v)document.getElementById('vendaComprador').value=v.comprador||'';}
-};
-const salvarVendaFnV2671=salvarVendaFn;
-salvarVendaFn=function(){
-    const nome=document.getElementById('vendaComprador')?.value.trim()||'';
-    if(!nome)return alert('Selecione ou cadastre o comprador antes de salvar a venda.');
-    const cadastrado=compradorPorNome(nome);if(!cadastrado)return alert('Comprador não cadastrado. Selecione um nome da lista ou use o botão “Novo”.');
-    document.getElementById('vendaComprador').value=cadastrado.nome;
-    return salvarVendaFnV2671();
-};
 const renderCadastrosV2671=renderCadastros;
 renderCadastros=function(){
     garantirBaseCompradores(); renderCadastrosV2671();
@@ -4350,7 +4362,7 @@ function renderVendas(){
     <div class="form-grid">
       <div class="field"><label for="vendaTipoReceita">Tipo de receita</label><select id="vendaTipoReceita"><option value="produto">Venda de produto / material</option><option value="servico">Prestação de serviço</option></select></div>
       <div class="field"><label for="vendaData">Data</label><input type="date" id="vendaData"></div>
-      <div class="field venda-produto"><label for="vendaMaterial">Material / produto vendido</label><select id="vendaMaterial">${optMateriaisAgrupados('')}</select></div>
+      <div class="field venda-produto"><label for="vendaMaterial">Material / produto vendido</label><select id="vendaMaterial"><option value="">Selecione</option>${optMateriaisAgrupados('')}</select></div>
       <div class="field venda-produto"><label for="vendaCategoria">Categoria automática</label><input type="text" id="vendaCategoria" readonly></div>
       <div class="field venda-produto"><label for="vendaTipo">Tipo automático</label><input type="text" id="vendaTipo" readonly></div>
       <div class="field venda-produto"><label for="vendaUnidade">Unidade automática</label><input type="text" id="vendaUnidade" readonly></div>
@@ -4358,9 +4370,21 @@ function renderVendas(){
       <div class="field venda-produto"><label for="vendaPrecoUnit">Preço unitário</label><input type="number" min="0" step="any" id="vendaPrecoUnit" placeholder="R$ por unidade"></div>
       <div class="field venda-servico" style="display:none"><label for="vendaDescricaoServico">Serviço realizado</label><input type="text" id="vendaDescricaoServico" placeholder="Ex.: Coleta programada de recicláveis"></div>
       <div class="field venda-servico" style="display:none"><label for="vendaValorServico">Valor do serviço</label><input type="number" min="0" step="any" id="vendaValorServico" placeholder="R$ 0,00"></div>
-      <div class="field"><label for="vendaComprador" id="labelVendaComprador">Comprador cadastrado</label><div class="comprador-linha"><input type="text" id="vendaComprador" list="listaCompradoresVenda" placeholder="Digite para pesquisar"><button type="button" id="btnNovoCompradorVenda" class="info">➕ Novo</button></div><datalist id="listaCompradoresVenda">${compradores.map(c=>`<option value="${escapeHtml(c.nome)}"></option>`).join('')}</datalist><small class="muted" id="ajudaVendaComprador">Selecione um comprador ativo ou cadastre um novo.</small></div>
-      <div class="field"><label for="vendaObs">Observações</label><textarea id="vendaObs" placeholder="Informações complementares"></textarea></div>
+      <div class="venda-dados-comprador">
+        <div class="field"><label for="vendaComprador" id="labelVendaComprador">Comprador cadastrado</label><div class="comprador-linha"><input type="text" id="vendaComprador" list="listaCompradoresVenda" placeholder="Digite para pesquisar"><button type="button" id="btnNovoCompradorVenda" class="info">➕ Novo</button></div><datalist id="listaCompradoresVenda">${compradores.map(c=>`<option value="${escapeHtml(c.nome)}"></option>`).join('')}</datalist><small class="muted" id="ajudaVendaComprador">Selecione um comprador ativo ou cadastre um novo.</small></div>
+        <div class="field"><label for="vendaObs">Observações</label><textarea id="vendaObs" placeholder="Informações complementares"></textarea></div>
+      </div>
     </div>
+    <section id="vendaItensProduto">
+      <div class="btn-row">
+        <button type="button" id="vendaAdicionarLinha" class="info">+ Incluir material</button>
+        <button type="button" id="vendaCancelarMaterial" class="secondary" hidden>Descartar preenchimento</button>
+      </div>
+      <h3>Materiais da venda</h3>
+      <div class="table-wrap"><table><thead><tr><th>Material</th><th>Unidade</th><th>Quantidade</th><th>Preço unitário</th><th>Subtotal</th><th>Ações</th></tr></thead>
+      <tbody id="vendaLinhas"></tbody></table></div>
+      <div class="btn-row"><strong>Total da venda <span id="vendaTotal" aria-live="polite"></span></strong></div>
+    </section>
     <div class="btn-row"><button id="salvarVenda">${editVendaId?'Atualizar Receita':'Salvar Receita'}</button><button id="cancelarVenda" class="secondary" style="display:${editVendaId?'inline-block':'none'}">Cancelar</button></div></div>
     <div class="card-panel"><h3>💰 Filtros e Indicadores de Vendas e Receitas</h3><div class="filter-bar">
       <div class="filter-field"><label>Mês</label><select id="fVendaMes">${optMes('',true)}</select></div>
@@ -4373,82 +4397,250 @@ function renderVendas(){
     document.getElementById('salvarVenda').onclick=salvarVendaFn;
     document.getElementById('cancelarVenda').onclick=()=>{editVendaId=null;renderVendas()};
     document.getElementById('btnVendaFiltro').onclick=listarVendas;
-    document.getElementById('vendaMaterial').onchange=preencherInfoVenda;
+    vendaMaterial.onchange = () => {
+        if (!vendaMaterial.value) [vendaCategoria, vendaTipo, vendaUnidade].forEach(campo => { campo.value = ''; });
+        else preencherInfoVenda();
+    };
+    vendaAdicionarLinha.onclick = incluirMaterialDaVenda;
+    vendaCancelarMaterial.onclick = () => { limparMaterialDaVenda(); vendaMaterial.focus(); };
+    [vendaQuantidade, vendaPrecoUnit].forEach(campo => campo.addEventListener('input', () => { vendaCancelarMaterial.hidden = !temMaterialVendaPendente(); }));
+    vendaMaterial.addEventListener('change', () => { vendaCancelarMaterial.hidden = !temMaterialVendaPendente(); });
     document.getElementById('vendaTipoReceita').onchange=atualizarCamposVendaV130;
     document.getElementById('fVendaTipoReceita').onchange=listarVendas;
     document.getElementById('fVendaCategoria').onchange=listarVendas;
     document.getElementById('fVendaMaterial').onchange=listarVendas;
     document.getElementById('btnNovoCompradorVenda')?.addEventListener('click',cadastrarCompradorRapido);
-    preencherInfoVenda();
-    if(editVendaId)popularFormVenda(editVendaId); else atualizarCamposVendaV130();
+    materiaisVendaEmEdicao = [];
+    limparMaterialDaVenda();
+    if (editVendaId) popularFormVenda(editVendaId);
+    atualizarCamposVendaV130();
+    atualizarTotalVenda();
     listarVendas();
 }
 
 function atualizarCamposVendaV130(){
     let tipo=document.getElementById('vendaTipoReceita')?.value||'produto';
-    document.querySelectorAll('.venda-produto').forEach(el=>el.style.display=tipo==='produto'?'flex':'none');
+    document.getElementById('vendaItensProduto').hidden = tipo === 'servico';
+    document.querySelectorAll('.venda-produto').forEach(el => el.style.display = tipo === 'produto' ? 'flex' : 'none');
+    document.getElementById('salvarVenda').textContent = editVendaId ? 'Salvar alterações' : (tipo === 'servico' ? 'Salvar receita' : 'Finalizar venda');
     document.querySelectorAll('.venda-servico').forEach(el=>el.style.display=tipo==='servico'?'flex':'none');
     let label=document.getElementById('labelVendaComprador'), ajuda=document.getElementById('ajudaVendaComprador');
     if(label)label.textContent=tipo==='servico'?'Cliente / Gerador cadastrado':'Comprador cadastrado';
     if(ajuda)ajuda.textContent=tipo==='servico'?'Selecione o cliente/gerador atendido ou cadastre um novo.':'Selecione um comprador ativo ou cadastre um novo.';
 }
 
-function salvarVendaFn(){
-    const tipoReceita=document.getElementById('vendaTipoReceita')?.value||'produto';
-    const data=document.getElementById('vendaData')?.value||'';
-    const nomeCliente=(document.getElementById('vendaComprador')?.value||'').trim();
-    if(!data)return alert('Informe a data.');
-    if(!nomeCliente)return alert(tipoReceita==='servico'?'Selecione ou cadastre o cliente/gerador.':'Selecione ou cadastre o comprador.');
-    if(typeof compradorPorNome==='function'){
-        const cadastrado=compradorPorNome(nomeCliente);
-        if(!cadastrado)return alert('Cliente/Comprador não cadastrado. Selecione um nome da lista ou use o botão “Novo”.');
+function itensDaVenda(venda) {
+    if (!venda.vendaGrupoId) return [venda];
+    return db.vendas.filter(item => item.vendaGrupoId === venda.vendaGrupoId);
+}
+
+let materiaisVendaEmEdicao = [];
+let indiceMaterialVenda = null;
+
+function editarMaterialDaVenda(indice) {
+    const item = materiaisVendaEmEdicao[indice];
+    if (temMaterialVendaPendente() && !confirm('Descartar o preenchimento atual e editar este material?')) return;
+    indiceMaterialVenda = indice;
+    const material = document.getElementById('vendaMaterial');
+    material.innerHTML = '<option value="">Selecione</option>' + optMateriaisAgrupados(item.material);
+    material.value = item.material;
+    vendaQuantidade.value = item.quantidade;
+    vendaPrecoUnit.value = item.precoUnit;
+    preencherInfoVenda();
+    vendaAdicionarLinha.textContent = 'Atualizar material';
+    vendaCancelarMaterial.hidden = false;
+    material.focus();
+}
+
+function limparMaterialDaVenda() {
+    indiceMaterialVenda = null;
+    vendaMaterial.innerHTML = '<option value="">Selecione</option>' + optMateriaisAgrupados('');
+    [vendaCategoria, vendaTipo, vendaUnidade, vendaQuantidade, vendaPrecoUnit].forEach(campo => { campo.value = ''; });
+    vendaAdicionarLinha.textContent = '+ Incluir material';
+    vendaCancelarMaterial.hidden = true;
+}
+
+function temMaterialVendaPendente() {
+    return indiceMaterialVenda !== null || !!(vendaMaterial.value || vendaQuantidade.value || vendaPrecoUnit.value ||
+        vendaQuantidade.validity.badInput || vendaPrecoUnit.validity.badInput);
+}
+
+function validarMateriaisDaVenda(itens, anteriores) {
+    const estoque = new Map(calcularEstoque().map(item => [item.material, item.saldo]));
+    anteriores.filter(item => registroAtivo(item) && vendaEhProdutoV130(item)).forEach(item => {
+        estoque.set(item.material, (estoque.get(item.material) || 0) + Number(item.quantidade));
+    });
+    for (const [indice, item] of itens.entries()) {
+        if (!item.cadastro || !(item.quantidade > 0) || !(item.precoUnit > 0) || !(item.total > 0) || !Number.isFinite(item.total)) {
+            alert(`Preencha material, quantidade e preço válidos para o item ${indice + 1}.`);
+            return false;
+        }
+        const saldo = estoque.get(item.material) || 0;
+        if (item.quantidade - saldo > 1e-9) {
+            alert(`Estoque insuficiente de ${item.material}. Disponível: ${num(Math.max(0, saldo), 8)} ${item.cadastro.unidade || 'kg'}.`);
+            return false;
+        }
+        estoque.set(item.material, saldo - item.quantidade);
     }
-    const atual=editVendaId?(db.vendas||[]).find(v=>String(v.id)===String(editVendaId)):null;
-    if(atual&&registroCancelado(atual))return alert('Registro cancelado não pode ser editado. Lance uma nova receita.');
-    let item={id:editVendaId||Date.now(),data,tipoReceita,comprador:nomeCliente,observacoes:document.getElementById('vendaObs')?.value||''};
-    if(tipoReceita==='servico'){
-        const descricao=(document.getElementById('vendaDescricaoServico')?.value||'').trim();
-        const valor=Number(document.getElementById('vendaValorServico')?.value||0);
-        if(!descricao)return alert('Informe o serviço realizado.');
-        if(!(valor>0))return alert('Informe o valor do serviço.');
-        Object.assign(item,{material:'',categoria:'Serviços',tipo:'Serviço',unidade:'serviço',quantidade:0,precoUnit:0,total:valor,descricaoServico:descricao});
-    }else{
-        const material=document.getElementById('vendaMaterial')?.value||'';
-        const qtd=Number(document.getElementById('vendaQuantidade')?.value||0);
-        const precoUnit=Number(document.getElementById('vendaPrecoUnit')?.value||0);
-        if(!material||!(qtd>0)||!(precoUnit>0))return alert('Preencha material, quantidade e preço unitário.');
-        let matCad=(db.materiais||[]).find(m=>m.nome===material)||{};
-        let categoria=document.getElementById('vendaCategoria')?.value||matCad.categoria||'';
-        let unidade=document.getElementById('vendaUnidade')?.value||matCad.unidade||'kg';
-        let tipo=document.getElementById('vendaTipo')?.value||matCad.tipoPadrao||'Bruto';
-        let estoqueAtual=calcularEstoque().find(e=>e.material===material)?.saldo||0;
-        let qtdOriginal=(atual&&vendaEhProdutoV130(atual)&&atual.material===material)?Number(atual.quantidade||0):0;
-        if(qtd>estoqueAtual+qtdOriginal)return alert(`Estoque insuficiente. Disponível para venda: ${num(estoqueAtual+qtdOriginal)} ${unidade}.`);
-        Object.assign(item,{material,categoria,tipo,unidade,quantidade:qtd,precoUnit,total:qtd*precoUnit,descricaoServico:''});
+    return true;
+}
+
+function incluirMaterialDaVenda() {
+    const material = vendaMaterial.value;
+    const quantidade = vendaQuantidade.valueAsNumber;
+    const precoUnit = vendaPrecoUnit.valueAsNumber;
+    const cadastro = db.materiais.find(item => item.nome === material);
+    const item = {id: materiaisVendaEmEdicao[indiceMaterialVenda]?.id, material, quantidade, precoUnit, cadastro,
+        total: Number((quantidade * precoUnit).toFixed(2))};
+    const proposta = [...materiaisVendaEmEdicao];
+    if (indiceMaterialVenda === null) proposta.push(item);
+    else proposta[indiceMaterialVenda] = item;
+    const original = db.vendas.find(venda => String(venda.id) === String(editVendaId));
+    if (!validarMateriaisDaVenda(proposta, original ? itensDaVenda(original) : [])) return;
+    materiaisVendaEmEdicao = proposta;
+    limparMaterialDaVenda();
+    atualizarTotalVenda();
+    vendaMaterial.focus();
+}
+
+function atualizarTotalVenda() {
+    const lista = document.getElementById('vendaLinhas');
+    lista.replaceChildren();
+    if (!materiaisVendaEmEdicao.length) {
+        lista.innerHTML = '<tr><td colspan="6">Nenhum material incluído.</td></tr>';
     }
-    if(atual)aplicarAuditoriaSalvar(item,atual);else prepararAuditoriaRegistro(item);
-    const estavaEditando=!!editVendaId;
-    if(editVendaId){let i=db.vendas.findIndex(v=>String(v.id)===String(editVendaId));if(i>=0)db.vendas[i]=item;editVendaId=null}else db.vendas.push(item);
-    salvarDB();
-    if(typeof mostrarToast==='function')mostrarToast(estavaEditando?'Receita atualizada com sucesso.':'Receita registrada com sucesso.','sucesso');
+    materiaisVendaEmEdicao.forEach((item, indice) => {
+        const linha = lista.insertRow();
+        const valores = [item.material, item.cadastro?.unidade || item.unidade || 'kg',
+            num(item.quantidade, 8), moedaUnitVenda(item.precoUnit), moeda(item.total)];
+        valores.forEach(valor => { linha.insertCell().textContent = valor; });
+        const acoes = linha.insertCell();
+        acoes.innerHTML = '<button type="button" class="mini-btn info">Editar</button> <button type="button" class="mini-btn danger">Remover</button>';
+        const [editar, remover] = acoes.querySelectorAll('button');
+        editar.setAttribute('aria-label', 'Editar ' + item.material);
+        remover.setAttribute('aria-label', 'Remover ' + item.material);
+        editar.onclick = () => editarMaterialDaVenda(indice);
+        remover.onclick = () => {
+            if (indiceMaterialVenda === indice) limparMaterialDaVenda();
+            else if (indiceMaterialVenda !== null && indiceMaterialVenda > indice) indiceMaterialVenda--;
+            materiaisVendaEmEdicao.splice(indice, 1);
+            atualizarTotalVenda();
+        };
+    });
+    vendaTotal.textContent = moeda(materiaisVendaEmEdicao.reduce((soma, item) => soma + Number(item.total || 0), 0));
+}
+
+function moedaUnitVenda(valor) {
+    return new Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL', maximumFractionDigits:8}).format(valor);
+}
+
+function gravarVendaCompleta(proximos) {
+    const anteriores = db.vendas;
+    db.vendas = proximos;
+    try {
+        salvarDB();
+    } catch (erro) {
+        db.vendas = anteriores;
+        return false;
+    }
+    return true;
+}
+
+function tabelaItensVenda(itens) {
+    return `<table><thead><tr><th>Material</th><th>Quantidade</th><th>Preço unitário</th><th>Subtotal</th></tr></thead>
+      <tbody>${itens.map(item => `<tr><td>${escapeHtml(item.material)}</td><td>${num(item.quantidade, 8)} ${escapeHtml(item.unidade || 'kg')}</td>
+      <td>${escapeHtml(moedaUnitVenda(item.precoUnit))}</td>
+      <td>${moeda(item.total)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function emitirComprovanteVenda(id) {
+    const venda = db.vendas.find(item => String(item.id) === String(id));
+    if (!venda || !vendaEhProdutoV130(venda) || !registroAtivo(venda)) return;
+    const itens = itensDaVenda(venda).filter(registroAtivo);
+    const numero = venda.vendaGrupoId || venda.id;
+    const coop = db.cooperativa || {};
+    const janela = window.open('', '_blank', 'width=850,height=720');
+    if (!janela) return alert('Permita janelas pop-up para abrir o comprovante.');
+    janela.opener = null;
+    janela.document.write(`<!doctype html><html lang="pt-BR"><meta charset="UTF-8"><title>Comprovante de venda</title>
+      <style>body{font:15px Arial,sans-serif;margin:32px;color:#142638}table{width:100%;border-collapse:collapse}td,th{padding:9px;border-bottom:1px solid #ccc;text-align:left}
+      .total{text-align:right;font-weight:bold}@media print{button{display:none}body{margin:0}}</style>
+      <button type="button" onclick="window.print()">Imprimir / Salvar PDF</button>
+      <h1>Comprovante de venda</h1><p>${escapeHtml(coop.nomeFantasia || coop.nome || '')}</p>
+      <p><strong>Venda nº</strong> ${escapeHtml(numero)} · ${formatarDataBR(venda.data)}</p>
+      <p><strong>Comprador</strong> ${escapeHtml(venda.comprador || '')}</p>
+      ${tabelaItensVenda(itens)}<p class="total">Total da venda ${moeda(itens.reduce((total,item) => total + Number(item.total),0))}</p>
+      ${venda.observacoes ? `<p><strong>Observações</strong> ${escapeHtml(venda.observacoes)}</p>` : ''}</html>`);
+    janela.document.close();
+}
+
+function salvarVendaFn() {
+    const tipoReceita = vendaTipoReceita.value;
+    const data = vendaData.value;
+    if (!data) return alert('Informe a data.');
+    const comprador = compradorPorNome(vendaComprador.value.trim());
+    if (!comprador) return alert('Selecione um comprador ou cliente cadastrado.');
+    const atual = db.vendas.find(v => String(v.id) === String(editVendaId));
+    if (editVendaId && (!atual || !registroAtivo(atual))) return alert('Receita indisponível para edição.');
+    const anteriores = atual ? itensDaVenda(atual) : [];
+    const dados = {data, tipoReceita, comprador: comprador.nome, observacoes: vendaObs.value};
+    const idsUsados = new Set(db.vendas.flatMap(item => [String(item.id), String(item.vendaGrupoId || '')]));
+    let proximoId = Date.now();
+    const novoId = () => {
+        while (idsUsados.has(String(proximoId))) proximoId++;
+        idsUsados.add(String(proximoId));
+        return proximoId++;
+    };
+    let itens;
+    if (tipoReceita === 'servico') {
+        const descricao = vendaDescricaoServico.value.trim();
+        const valor = vendaValorServico.valueAsNumber;
+        if (!descricao || !(valor > 0) || !Number.isFinite(valor)) return alert('Informe o serviço e um valor válido.');
+        itens = [{...dados, id: atual?.id ?? novoId(), material:'', categoria:'Serviços', tipo:'Serviço', unidade:'serviço', quantidade:0, precoUnit:0, total:valor, descricaoServico:descricao}];
+    } else {
+        if (temMaterialVendaPendente()) return alert('Inclua o material preenchido ou descarte o preenchimento antes de finalizar.');
+        const linhas = materiaisVendaEmEdicao.map(item => ({
+            ...item, cadastro: db.materiais.find(material => material.nome === item.material)
+        }));
+        if (!linhas.length) return alert('Inclua pelo menos um material para finalizar a venda.');
+        if (!validarMateriaisDaVenda(linhas, anteriores)) return;
+        itens = linhas.map(item => ({
+            ...dados, id: anteriores.find(v => String(v.id) === String(item.id))?.id ?? novoId(),
+            material: item.material, categoria: item.cadastro.categoria || '', tipo: item.cadastro.tipoPadrao || 'Bruto',
+            unidade: item.cadastro.unidade || 'kg', quantidade: item.quantidade, precoUnit: item.precoUnit, total: item.total, descricaoServico:''
+        }));
+        const numero = atual?.vendaGrupoId || atual?.id || itens[0].id;
+        itens.forEach(item => { item.vendaGrupoId = numero; });
+    }
+    itens.forEach(item => {
+        const anterior = anteriores.find(v => String(v.id) === String(item.id));
+        if (anterior) aplicarAuditoriaSalvar(item, anterior);
+        else prepararAuditoriaRegistro(item);
+    });
+    const substituidos = new Set(anteriores.map(item => String(item.id)));
+    if (!gravarVendaCompleta([...db.vendas.filter(item => !substituidos.has(String(item.id))), ...itens])) return;
+    editVendaId = null;
     renderVendas();
+    if (typeof mostrarToast === 'function') mostrarToast(atual ? 'Alterações salvas.' : (tipoReceita === 'produto' ? 'Venda registrada com sucesso.' : 'Receita registrada com sucesso.'), 'sucesso');
 }
 
-function popularFormVenda(id){
-    let v=(db.vendas||[]).find(x=>String(x.id)===String(id));if(!v)return;
-    document.getElementById('vendaTipoReceita').value=tipoReceitaVendaV130(v);
-    atualizarCamposVendaV130();
-    vendaData.value=v.data||''; vendaComprador.value=v.comprador||''; vendaObs.value=v.observacoes||'';
-    if(vendaEhServicoV130(v)){
-        vendaDescricaoServico.value=v.descricaoServico||v.tipo||'';
-        vendaValorServico.value=Number(v.total)||0;
-    }else{
-        vendaMaterial.value=v.material||''; preencherInfoVenda();
-        if(v.categoria)vendaCategoria.value=v.categoria;if(v.unidade)vendaUnidade.value=v.unidade;if(v.tipo)vendaTipo.value=v.tipo;
-        vendaQuantidade.value=v.quantidade||'';vendaPrecoUnit.value=v.precoUnit||'';
+function popularFormVenda(id) {
+    const venda = db.vendas.find(item => String(item.id) === String(id));
+    if (!venda) return;
+    vendaTipoReceita.value = tipoReceitaVendaV130(venda);
+    vendaTipoReceita.disabled = true;
+    vendaData.value = venda.data || '';
+    vendaComprador.value = venda.comprador || '';
+    vendaObs.value = venda.observacoes || '';
+    if (vendaEhServicoV130(venda)) {
+        vendaDescricaoServico.value = venda.descricaoServico || venda.tipo || '';
+        vendaValorServico.value = Number(venda.total) || 0;
+    } else {
+        materiaisVendaEmEdicao = itensDaVenda(venda).map(item => ({
+            ...item, cadastro: db.materiais.find(material => material.nome === item.material)
+        }));
     }
 }
-
 
 function vendaEhOrganicosV131(v){
     if(!vendaEhProdutoV130(v))return false;
@@ -4489,8 +4681,32 @@ function listarVendas(){
       <div class="card"><div>⚖️ Material vendido</div><div class="card-value">${num(qtdTotal)} kg</div><small>somente produtos</small></div>
       <div class="card"><div>📈 Preço médio</div><div class="card-value">${moeda(precoMedio)}/kg</div><small>somente produtos</small></div>
     </div>`;
-    let pag=paginarV2659A(lista,'vendas');
-    listaVendas.innerHTML=`${painel}<div class="table-wrap"><table><tr><th>Data</th><th>Tipo receita</th><th>Material / Serviço</th><th>Categoria</th><th>Qtd</th><th>Preço / Valor</th><th>Total</th><th>Cliente / Comprador</th><th>Status</th><th>Ações</th></tr>${pag.itens.map(v=>{let serv=vendaEhServicoV130(v),matCad=(db.materiais||[]).find(m=>m.nome===v.material)||{},cancelado=registroCancelado(v);return `<tr class="${cancelado?'linha-registro-cancelado':''}"><td>${formatarDataBR(v.data)}</td><td><span class="status-chip ${serv?'chip-pendente':'chip-pago'}">${serv?'SERVIÇO':'PRODUTO'}</span></td><td>${escapeHtml(serv?(v.descricaoServico||'Serviço'):v.material)}${detalhesCancelamento(v)}</td><td>${escapeHtml(serv?'Serviços':(v.categoria||matCad.categoria||''))}</td><td>${serv?'-':`${num(v.quantidade)} ${escapeHtml(v.unidade||matCad.unidade||'kg')}`}</td><td>${serv?moeda(v.total):moeda(v.precoUnit)}</td><td><strong>${moeda(v.total)}</strong></td><td>${escapeHtml(v.comprador||'')}</td><td>${cancelado?'<span class="status-chip chip-cancelado">CANCELADO</span>':'<span class="status-chip chip-pago">ATIVO</span>'}</td><td>${cancelado?'<span class="muted">Auditoria</span>':`<button class="mini-btn info" onclick="editarVenda(${v.id})">✏️ Editar</button> <button class="mini-btn danger" onclick="excluirVenda(${v.id})">🚫 Cancelar</button>`}</td></tr>`}).join('')||'<tr><td colspan="10">Sem receitas para os filtros selecionados.</td></tr>'}</table></div>${htmlPaginacaoV2659A('vendas',pag,'listarVendas')}`;
+    const grupos = new Map();
+    lista.forEach(venda => {
+        const chave = venda.vendaGrupoId ? `grupo-${venda.vendaGrupoId}` : `registro-${venda.id}`;
+        if (!grupos.has(chave)) grupos.set(chave, venda);
+    });
+    const pag = paginarV2659A(Array.from(grupos.values()), 'vendas');
+    const linhas = pag.itens.map(venda => {
+        const servico = vendaEhServicoV130(venda);
+        const itens = itensDaVenda(venda);
+        const cancelada = registroCancelado(venda);
+        const total = itens.reduce((soma, item) => soma + Number(item.total || 0), 0);
+        const resumo = servico ? escapeHtml(venda.descricaoServico || 'Serviço') :
+            `<details><summary>${itens.length === 1 ? escapeHtml(venda.material) : `${itens.length} itens`}</summary>${tabelaItensVenda(itens)}</details>`;
+        const id = escapeHtml(JSON.stringify(venda.id));
+        const acoes = cancelada ? '<span class="muted">Auditoria</span>' :
+            `<button class="mini-btn info" onclick="editarVenda(${id})">Editar</button>
+             <button class="mini-btn danger" onclick="excluirVenda(${id})">Cancelar</button>
+             ${servico ? '' : `<button class="mini-btn info" onclick="emitirComprovanteVenda(${id})">Comprovante</button>`}`;
+        return `<tr class="${cancelada?'linha-registro-cancelado':''}"><td>${formatarDataBR(venda.data)}</td><td>${escapeHtml(venda.vendaGrupoId || venda.id)}</td>
+            <td>${servico?'Serviço':'Produto'}</td><td>${resumo}${detalhesCancelamento(venda)}</td><td><strong>${moeda(total)}</strong></td>
+            <td>${escapeHtml(venda.comprador || '')}</td><td><span class="status-chip ${cancelada?'chip-cancelado':'chip-pago'}">${cancelada?'CANCELADO':'ATIVO'}</span></td><td>${acoes}</td></tr>`;
+    }).join('');
+    listaVendas.innerHTML = `${painel}${cat || mat ? '<p class="muted">Os indicadores seguem o filtro. O histórico mostra o total de cada venda encontrada.</p>' : ''}
+        <div class="table-wrap"><table><thead><tr><th>Data</th><th>Nº do registro</th><th>Tipo</th><th>Material / Serviço</th><th>Total</th><th>Cliente / Comprador</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody>${linhas || '<tr><td colspan="8">Sem receitas para os filtros selecionados.</td></tr>'}</tbody></table></div>${htmlPaginacaoV2659A('vendas',pag,'listarVendas')}`;
+
 }
 
 // Mantém o faturamento total no Dashboard, mas calcula preço médio apenas sobre produtos.
