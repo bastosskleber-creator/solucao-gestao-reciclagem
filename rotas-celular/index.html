@@ -165,7 +165,7 @@ function draw(){
   if(stop.inicio)line(card,'Horário previsto: '+stop.inicio+(stop.fim?'–'+stop.fim:''));
   const old=state.registros[index];
   if(old)line(card,old.resultado+' · '+hour(old.hora)+(old.observacao?' · '+old.observacao:''));
-  if(state.fim&&old?.resultado==='Parcial'){
+  if(state.fim&&stop.tipo==='Trecho de rua'&&old?.resultado==='Parcial'){
     const editor=document.createElement('div');editor.hidden=true;
     const label=document.createElement('label');label.className='distance-field';
     label.textContent='Até onde foi percorrido e o que ficou pendente';
@@ -177,7 +177,7 @@ function draw(){
       state.registros[index]={...old,observacao:note.value.trim()};save();
     },editor);
     note.oninput=()=>note.setCustomValidity('');
-    button(old.observacao?'Editar observação':'Adicionar observação',()=>{editor.hidden=!editor.hidden;if(!editor.hidden)note.focus();},card);
+    button('Reabrir observação',()=>{editor.hidden=!editor.hidden;if(!editor.hidden)note.focus();},card);
     card.append(editor);
   }
   if(!state.inicio||state.fim)return;
