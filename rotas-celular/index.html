@@ -57,6 +57,10 @@ function routeFileName(run,prefix){
     const code=clean(run.id).slice(0,8).toUpperCase()||'Sem-codigo';
     return prefix+'_'+name+'_'+date+'_'+shift+'_Controle-'+code;
   }
+// A link may reuse this tab and change only its fragment. Load the new ficha in that case.
+function openRouteFromLink(){if(location.hash.startsWith('#f='))location.reload();}
+globalThis.addEventListener('hashchange',openRouteFromLink);
+globalThis.addEventListener('pageshow',event=>{if(event.persisted)openRouteFromLink();});
 const SLOT='sigres-rota-celular-v1';
 let saved=null;try{saved=JSON.parse(localStorage.getItem(SLOT))}catch{}
 let incoming=null;
