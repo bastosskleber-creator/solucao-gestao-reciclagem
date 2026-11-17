@@ -1,0 +1,259 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SIGRES Rotas</title><link rel="manifest" href="./manifest.webmanifest"><meta name="theme-color" content="#173452"><meta name="referrer" content="no-referrer">
+<style>body{font:17px system-ui;margin:20px auto;padding:0 16px;max-width:560px;color:#173452;background:#eef3f8}header,article{padding:16px;background:white;margin:12px 0;border-radius:12px}header{background:#173452;color:white;border-bottom:5px solid #dba942}button,select,input{font:inherit;padding:10px;min-height:44px;margin:5px}button{background:#173452;color:white;border:0;border-radius:8px}p{overflow-wrap:anywhere}button[aria-pressed=true]{background:#dba942;color:#173452}.collection-header{padding:20px;background:#1f4e79;border-bottom-color:#d4af37}
+.brand{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.8rem}
+.brand img{object-fit:contain}.brand strong{color:#f5d568;font-size:1rem}
+.brand span{border-left:1px solid #aec4d7;padding-left:10px;margin-left:4px}
+.collection-header h1{font-size:1.6rem;margin:18px 0 4px}
+.organization{margin:0;color:#fff;font-weight:600}
+.collection-header dl{display:grid;grid-template-columns:1.1fr .8fr 1.2fr;gap:12px;margin:16px 0 0;padding:12px;background:#fff;color:#173452;border-radius:8px}
+.collection-header dl .route{grid-column:1/-1}.collection-header dl>div{min-width:0}
+.collection-header dt{font-size:.78rem;color:#40586b}
+.collection-header dd{margin:3px 0 0;font-weight:700;overflow-wrap:anywhere}
+body{box-sizing:border-box;padding:0 12px}
+#body article{border:1px solid #d9e4ee;border-radius:14px}
+#body h2{font-size:1.15rem;margin:0 0 12px}
+#body p{margin:8px 0}
+#body button,#body input,#body select,#body textarea{box-sizing:border-box;max-width:100%;border-radius:9px;margin:0}
+#body textarea{width:100%;font:inherit;padding:10px;resize:vertical;margin:8px 0}
+#body input,#body select,#body textarea{border:1px solid #aebfd0;background:#fff;color:#173452;min-width:0}
+#body button:disabled{opacity:.55;cursor:default}
+#body [hidden]{display:none}
+.collection-fields{display:flex;flex-wrap:wrap;gap:12px;align-items:start;margin-bottom:12px}
+.collection-fields>label{flex:1 1 180px}
+@media(min-width:460px){
+ .collection-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+ .collection-fields>.distance-field{grid-column:2;grid-row:1 / span 2}
+ .collection-fields>.start-route{grid-column:1;grid-row:2;align-self:end;justify-self:start}
+}
+.collection-fields label,.distance-field{display:grid;gap:5px;font-weight:600}
+.distance-field{flex:1 1 190px}
+.distance-field input{width:9rem}
+.distance-field small,.collection-note{font-size:.86rem;color:#40586b;font-weight:400}
+.collection-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.collection-status{padding:10px 12px;background:#eef4fa;border-radius:8px;font-weight:700}
+.route-summary{margin-top:16px;padding:12px;background:#fff;color:#173452;border-radius:8px}
+.collection-header .route-heading{display:block;margin:0 0 12px;padding:0}
+.collection-header .route-metadata{margin:0;padding:0}
+</style>
+<header class="collection-header">
+  <div class="brand"><img hidden src="" alt="" width="28" height="28"><strong>SIGRES</strong><span>Sebrae / Pró-Catadores</span></div>
+  <h1>Ficha de coleta</h1>
+  <p id="organization" class="organization"></p>
+  <div class="route-summary">
+    <dl class="route-heading"><div><dt>Rota</dt><dd id="route-name"></dd></div></dl>
+    <dl class="route-metadata" style="display:grid;grid-template-columns:1.1fr .8fr 1.2fr;gap:10px">
+      <div><dt>Data da coleta</dt><dd id="collection-date"></dd></div>
+      <div><dt>Turno</dt><dd id="shift"></dd></div>
+      <div><dt>Tipo de coleta</dt><dd id="collection-type"></dd></div>
+    </dl>
+  </div>
+</header><main id="body"></main>
+<script>
+function routeFileName(run,prefix){
+    const clean=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    const name=clean(run.nome).slice(0,80)||'Rota';
+    const date=/^\d{4}-\d{2}-\d{2}$/.test(run.data||'')?run.data.split('-').reverse().join('-'):'Sem-data';
+    const shift=clean(run.turno==='Todos'?'Dia-inteiro':run.turno)||'Turno';
+    const code=clean(run.id).slice(0,8).toUpperCase()||'Sem-codigo';
+    return prefix+'_'+name+'_'+date+'_'+shift+'_Controle-'+code;
+  }
+const SLOT='sigres-rota-celular-v1';
+let saved=null;try{saved=JSON.parse(localStorage.getItem(SLOT))}catch{}
+let incoming=null;
+try{if(location.hash.startsWith('#f=')){
+ const raw=atob(location.hash.slice(3).replace(/-/g,'+').replace(/_/g,'/'));
+ incoming=JSON.parse(new TextDecoder().decode(Uint8Array.from(raw,c=>c.charCodeAt(0))));
+ if(incoming.formato!=='SIGRES-ficha-rota'||incoming.versao!==1||!incoming.id||!Array.isArray(incoming.paradas)||incoming.paradas.length>500)throw Error();
+}}catch{document.body.textContent='Link da ficha inválido. Peça ao responsável para enviar novamente.';throw Error('Ficha inválida');}
+let ficha=saved?.ficha;
+let state=saved?.state||{inicio:null,fim:null,registros:{}};
+if(incoming&&incoming.id!==ficha?.id){
+ if(!ficha||confirm('Carregar a nova rota? A ficha anterior será substituída. Só confirme se o responsável já recebeu a anterior.')){
+  ficha=incoming;state={inicio:null,fim:null,registros:{}};
+ }
+}
+if(!ficha){document.body.innerHTML='<main><h1>SIGRES Rotas</h1><p>Abra o link da rota enviado pelo responsável.</p><p>Na primeira utilização, abra no Safari ou Chrome. Peça ajuda para adicionar à tela inicial e use esse ícone para reabrir sem internet.</p></main>';throw Error('Sem ficha');}
+function persist(){localStorage.setItem(SLOT,JSON.stringify({ficha,state}));}
+try{persist();history.replaceState(null,'',location.pathname)}catch{alert('Não foi possível salvar a ficha neste aparelho. Não inicie a coleta antes de resolver.');throw Error('Sem armazenamento');}
+const storageStatus=document.createElement('p');storageStatus.setAttribute('role','status');document.querySelector('header').append(storageStatus);
+let offlineReady=false;
+function showStorage(){storageStatus.textContent=offlineReady?'✓ Ficha salva. Pronta para usar sem internet.':'Ficha salva. Preparando abertura sem internet…';}
+showStorage();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{if(navigator.serviceWorker.controller){offlineReady=true;showStorage();}}).catch(()=>{storageStatus.textContent='Ficha salva, mas abertura offline não preparada. Conecte à internet e reabra.';});navigator.serviceWorker.addEventListener('controllerchange',()=>{offlineReady=true;showStorage();});}
+const root=document.getElementById('body');
+const organization=document.getElementById('organization');
+organization.textContent=ficha.organizacao||'';
+organization.hidden=!ficha.organizacao;
+document.getElementById('route-name').textContent=ficha.nome;
+document.getElementById('collection-type').textContent=ficha.tipoColeta;
+document.getElementById('collection-date').textContent=ficha.data.split('-').reverse().join('/');
+document.getElementById('shift').textContent=ficha.turno==='Todos'?'Dia inteiro':ficha.turno;
+const hour=value=>new Date(value).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+function save(){try{persist();draw();showStorage()}catch{alert('Não foi possível salvar. Mantenha a ficha aberta e peça ajuda ao responsável.');}}
+function button(title,action,parent=root){
+ const control=document.createElement('button');control.textContent=title;control.onclick=action;parent.append(control);return control;
+}
+function line(parent,value){const p=document.createElement('p');p.textContent=value;parent.append(p);}
+function section(title){
+ const card=document.createElement('article');
+ const heading=document.createElement('h2');heading.textContent=title;
+ card.append(heading);root.append(card);return card;
+}
+function odometer(parent,title,example){
+ const label=document.createElement('label');label.className='distance-field';
+ const caption=document.createElement('span');caption.textContent=title;
+ const field=document.createElement('input');
+ field.type='number';field.inputMode='decimal';field.min='0';field.step='any';field.required=true;
+ const hint=document.createElement('small');hint.textContent=example;
+ label.append(caption,field,hint);parent.append(label);return field;
+}
+function validOdometro(field){return field.checkValidity()&&Number.isFinite(field.valueAsNumber);}
+function draw(){
+ root.replaceChildren();
+ const departure=section('Saída da rota');
+ if(!state.inicio){
+   const fields=document.createElement('div');fields.className='collection-fields';departure.append(fields);
+   const label=document.createElement('label');label.textContent='Meio de coleta';
+   const mode=document.createElement('select');
+   mode.add(new Option('Com veículo','vehicle'));
+   mode.add(new Option('A pé ou carrinho manual','manual'));
+   mode.value=ficha.usarOdometro?'vehicle':'manual';
+   label.append(mode);fields.append(label);
+   const initial=odometer(fields,'Quilometragem do painel na saída (km)','Ex.: se o painel mostra 48.350 km, digite 48350.');
+   function updateMode(){initial.parentElement.hidden=mode.value==='manual';}
+   mode.onchange=updateMode;updateMode();
+   const start=button('Iniciar rota',()=>{
+     if(mode.value==='vehicle'&&!validOdometro(initial)){initial.reportValidity();return;}
+     state.modo=mode.value;
+     if(state.modo==='vehicle')state.odometroInicio=initial.valueAsNumber;
+     state.inicio=new Date().toISOString();save();
+   },fields);
+   start.className='start-route';
+   line(departure,'Ao iniciar, o horário de saída é registrado automaticamente.');
+   departure.lastElementChild.className='collection-note';
+ }else{
+   line(departure,'Horário de saída registrado: '+hour(state.inicio));
+   departure.lastElementChild.className='collection-status';
+ }
+ ficha.paradas.forEach((stop,index)=>{
+  const card=document.createElement('article');root.append(card);
+  line(card, (index+1)+'. '+stop.local+' · '+stop.turno);
+  if(stop.referencia)line(card,stop.referencia);
+  if(stop.inicio)line(card,'Horário previsto: '+stop.inicio+(stop.fim?'–'+stop.fim:''));
+  const old=state.registros[index];
+  if(old)line(card,old.resultado+' · '+hour(old.hora)+(old.observacao?' · '+old.observacao:''));
+  if(state.fim&&old?.resultado==='Parcial'){
+    const editor=document.createElement('div');editor.hidden=true;
+    const label=document.createElement('label');label.className='distance-field';
+    label.textContent='Até onde foi percorrido e o que ficou pendente';
+    const note=document.createElement('textarea');note.rows=3;note.value=old.observacao||'';
+    note.placeholder='Ex.: Rua das Flores até a casa 25. Da casa 26 em diante ficou para outro dia.';
+    label.append(note);editor.append(label);
+    button('Salvar observação',()=>{
+      if(!note.value.trim()){note.setCustomValidity('Informe até onde a equipe percorreu.');note.reportValidity();return;}
+      state.registros[index]={...old,observacao:note.value.trim()};save();
+    },editor);
+    note.oninput=()=>note.setCustomValidity('');
+    button(old.observacao?'Editar observação':'Adicionar observação',()=>{editor.hidden=!editor.hidden;if(!editor.hidden)note.focus();},card);
+    card.append(editor);
+  }
+  if(!state.inicio||state.fim)return;
+  const street=stop.tipo==='Trecho de rua';
+  const record=(resultado,observacao='')=>{state.registros[index]={resultado,observacao,hora:new Date().toISOString()};save()};
+  const failure=street?'Não percorrido':'Não atendido';
+  const choices=street?['Percorrido','Parcial',failure]:['Coletado','Sem material',failure];
+  const group=document.createElement('div');
+  group.className='collection-actions';
+  card.append(group);
+  for(const choice of choices){
+    const control=button(choice,()=>{
+      if(choice===failure){occurrence.hidden=false;select.focus();return;}
+      if(choice==='Parcial'){
+        partial.hidden=false;partialText.focus();return;
+      }
+      record(choice);
+    },group);
+    control.setAttribute('aria-pressed',String(old?.resultado===choice));
+  }
+  const partial=document.createElement('div');
+  partial.hidden=old?.resultado!=='Parcial';
+  const partialLabel=document.createElement('label');
+  partialLabel.textContent='Até onde foi percorrido e o que ficou pendente';
+  partialLabel.className='distance-field';
+  const partialText=document.createElement('textarea');
+  partialText.rows=3;
+  partialText.placeholder='Ex.: Rua das Flores percorrida até a casa 25. Da casa 26 em diante ficou para outro dia.';
+  partialText.value=old?.resultado==='Parcial'?(old.observacao||''):'';
+  partialLabel.append(partialText);partial.append(partialLabel);
+  button('Salvar observação',()=>{
+    const note=partialText.value.trim();
+    if(!note){partialText.setCustomValidity('Informe até onde a equipe percorreu.');partialText.reportValidity();return;}
+    record('Parcial',note);
+  },partial);
+  partialText.oninput=()=>partialText.setCustomValidity('');
+  card.append(partial);
+  const occurrence=document.createElement('div');
+  occurrence.hidden=old?.resultado!==failure;
+  const select=document.createElement('select');
+  select.setAttribute('aria-label','Motivo da ocorrência');
+  const reasons=street?['Via bloqueada','Acesso impedido','Interrupção da rota']:['Local fechado','Acesso bloqueado','Material fora do combinado'];
+  for(const reason of ['Selecione a ocorrência',...reasons,'Outros'])select.add(new Option(reason));
+  if(old?.resultado===failure&&reasons.includes(old.observacao))select.value=old.observacao;
+  select.onchange=()=>{
+    if(!select.selectedIndex)return;
+    if(select.value!=='Outros'){record(failure,select.value);return;}
+    const note=prompt('Descreva a ocorrência');
+    if(note?.trim())record(failure,note.trim());else select.selectedIndex=0;
+  };
+  occurrence.append(select);
+  card.append(occurrence);
+ });
+ const arrival=section('Chegada e fechamento');
+ const pending=ficha.paradas.filter((_,index)=>{
+   const record=state.registros[index];
+   return !record||(record.resultado==='Parcial'&&!record.observacao?.trim());
+ }).length;
+ const canClose=Boolean(state.inicio&&!pending);
+ if(!state.fim){
+   if(!state.inicio)line(arrival,'Inicie a rota para registrar a saída.');
+   else if(pending)line(arrival,pending===1?'Registre o resultado da parada que falta.':'Registre o resultado das '+pending+' paradas que faltam.');
+   const final=canClose&&state.modo==='vehicle'?
+     odometer(arrival,'Quilometragem do painel na chegada (km)','Digite o total que aparece no painel ao terminar a rota. Ex.: 48372.'):null;
+   if(final)final.min=String(state.odometroInicio);
+   const actions=document.createElement('div');actions.className='collection-actions';arrival.append(actions);
+   button('Encerrar rota',()=>{
+     if(final&&!validOdometro(final)){final.reportValidity();return;}
+     if(final)state.odometroFim=final.valueAsNumber;
+     state.fim=new Date().toISOString();save();
+   },actions).disabled=!canClose;
+
+   line(arrival,'Encerre a rota para liberar o envio da ficha.');
+   arrival.lastElementChild.className='collection-note';
+ }else{
+   const minutes=Math.floor((new Date(state.fim)-new Date(state.inicio))/60000);
+   line(arrival,'Horário de chegada registrado: '+hour(state.fim)+' · Duração: '+Math.floor(minutes/60)+'h '+minutes%60+'min');
+   arrival.lastElementChild.className='collection-status';
+   const returnName=routeFileName(ficha,'Retorno')+'.json';
+   const returnText=()=>JSON.stringify({formato:'SIGRES-retorno-rota',versao:1,saidaId:ficha.id,...state},null,2);
+   const exportActions=document.createElement('div');exportActions.className='collection-actions';arrival.append(exportActions);
+   const exportStatus=document.createElement('p');exportStatus.className='collection-note';exportStatus.setAttribute('role','status');arrival.append(exportStatus);
+   button('Enviar ficha',()=>{
+     const file=new File([returnText()],returnName,{type:'application/json'});
+     if(!navigator.share||!navigator.canShare?.({files:[file]})){
+       exportStatus.textContent='Este navegador não permite enviar o arquivo. Use Safari no iPhone ou Chrome no Android. A ficha continua salva.';return;
+     }
+     navigator.share({files:[file],title:'Retorno da coleta'}).then(()=>{
+       exportStatus.textContent='Compartilhamento realizado. Confirme com o responsável se recebeu. Sua ficha continua salva.';
+     }).catch(error=>{exportStatus.textContent=error.name==='AbortError'?'Envio cancelado. A ficha continua salva. Toque em Enviar ficha para tentar novamente.':'Não foi possível compartilhar. A ficha continua salva. Tente novamente.';});
+   },exportActions);
+   const help=document.createElement('details');const summary=document.createElement('summary');summary.textContent='Ajuda do responsável';help.append(summary);arrival.append(help);
+   button('Limpar ficha recebida pelo responsável',()=>{
+     if(!confirm('O responsável confirmou que importou esta ficha no SIGRES? Ao limpar, os registros serão apagados deste celular.'))return;
+     try{localStorage.removeItem(SLOT);location.reload()}catch{alert('Não foi possível limpar.');}
+   },help);
+   line(arrival,'Escolha o WhatsApp e o responsável. Se corrigir uma observação, toque em Enviar ficha novamente. Não é necessário baixar o arquivo.');
+   arrival.lastElementChild.className='collection-note';
+ }
+}
+draw();
+</script></html>
