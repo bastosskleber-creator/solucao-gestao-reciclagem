@@ -111,6 +111,7 @@ let offlineReady=false;
 function showStorage(){storageStatus.textContent=offlineReady?'✓ Ficha salva. Pronta para usar sem internet.':'Ficha salva. Preparando abertura sem internet…';}
 showStorage();
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(()=>navigator.serviceWorker.ready).then(()=>{if(navigator.serviceWorker.controller){offlineReady=true;showStorage();}}).catch(()=>{storageStatus.textContent='Ficha salva, mas abertura offline não preparada. Conecte à internet e reabra.';});navigator.serviceWorker.addEventListener('controllerchange',()=>{offlineReady=true;showStorage();});}
+document.title='SIGRES Rotas — '+ficha.nome+' — '+ficha.data.split('-').reverse().join('/');
 const root=document.getElementById('body');
 const organization=document.getElementById('organization');
 organization.textContent=ficha.organizacao||'';
